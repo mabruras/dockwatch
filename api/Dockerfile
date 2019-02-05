@@ -1,0 +1,14 @@
+FROM            python:3.7
+
+ENV             WRK_DIR /opt/dockwatch
+
+RUN             pip3 install \
+                docker \
+                Flask
+
+COPY            ./* ${WRK_DIR}
+
+WORKDIR         ${WRK_DIR}
+EXPOSE          5000
+
+CMD             [ "python", "app.py" ]
