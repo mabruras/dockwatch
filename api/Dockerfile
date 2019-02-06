@@ -2,7 +2,7 @@ FROM            python:3.7
 
 MAINTAINER      Brurås, Magnus <mabruraas@gmail.com>
 
-ENV             WRK_DIR /opt/dockwatch
+ENV             WRK_DIR /opt/dock-watch-api
 
 RUN             pip3 install \
                   flask-cors \

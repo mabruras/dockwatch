@@ -154,4 +154,4 @@ if __name__ == '__main__':
     cors = CORS(app)
     app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
 
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0')
