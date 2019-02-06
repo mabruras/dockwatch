@@ -5,8 +5,9 @@ MAINTAINER      Brurås, Magnus <mabruraas@gmail.com>
 ENV             WRK_DIR /opt/dockwatch
 
 RUN             pip3 install \
-                docker \
-                Flask
+                  flask-cors \
+                  docker \
+                  Flask
 
 COPY            ./* ${WRK_DIR}
 
