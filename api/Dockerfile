@@ -1,5 +1,7 @@
 FROM            python:3.7
 
+MAINTAINER      Brurås, Magnus <mabruraas@gmail.com>
+
 ENV             WRK_DIR /opt/dockwatch
 
 RUN             pip3 install \
