@@ -56,6 +56,58 @@ def get_app_versions(img_id):
     )
 
 
+@app.route('/containers/<con_id>/restart', methods=['POST'])
+@cross_origin()
+def remove_container(con_id):
+    client = docker.from_env()
+
+    try:
+        print(f'Restarting container with ID {con_id}')
+        client.containers.get(con_id).restart()
+    except docker.errors.APIError as e:
+        print(f'Failed restarting container with ID {con_id}: \n{e}')
+        client.close()
+        return Response(
+            response=e,
+            mimetype='text/plain',
+            status=500,
+        )
+
+    print('Restart complete')
+    client.close()
+    return Response(
+        response=json.dumps(dict()),
+        mimetype='application/json',
+        status=200,
+    )
+
+
+@app.route('/containers/<con_id>/delete', methods=['DELETE'])
+@cross_origin()
+def remove_container(con_id):
+    client = docker.from_env()
+
+    try:
+        print(f'Removing container with ID {con_id}')
+        client.containers.get(con_id).remove(force=True)
+    except docker.errors.APIError as e:
+        print(f'Failed removing container with ID {con_id}: \n{e}')
+        client.close()
+        return Response(
+            response=e,
+            mimetype='text/plain',
+            status=500,
+        )
+
+    print('Removal complete')
+    client.close()
+    return Response(
+        response=json.dumps(dict()),
+        mimetype='application/json',
+        status=200,
+    )
+
+
 def get_container_version(con):
     return {
         'versions': {
