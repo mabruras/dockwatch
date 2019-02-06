@@ -3,11 +3,13 @@ import json
 
 import docker
 from flask import Flask, Response
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
 
 @app.route('/images', methods=['GET'])
+@cross_origin()
 def get_applications():
     client = docker.from_env()
 
@@ -29,6 +31,7 @@ def get_applications():
 
 
 @app.route('/images/<img_id>', methods=['GET'])
+@cross_origin()
 def get_app_versions(img_id):
     client = docker.from_env()
 
@@ -62,4 +65,7 @@ def get_image_versions(img):
 
 
 if __name__ == '__main__':
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
+
     app.run(host='0.0.0.0')
