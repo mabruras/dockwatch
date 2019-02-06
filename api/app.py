@@ -15,17 +15,23 @@ def get_applications():
 
     images = dict()
 
-    for con in client.containers.list():
+    for con in client.containers.list(all=True):
         img_name = get_image_name(con.image)
         if img_name not in images:
             images.update({
                 img_name: {
                     'image': img_name,
-                    'containers': list()
+                    'status': dict(),
+                    'containers': list(),
                 }
             })
 
         images[img_name]['containers'].append(get_container_version(con))
+
+        # Updates total status counter
+        # with each containers status
+        statuses = images[img_name]['status']
+        statuses.update({con.status: statuses.get(con.status, 0) + 1})
 
     result = [images[v] for v in images]
 
@@ -45,7 +51,7 @@ def get_app_versions(img_name):
     print(f'getting versions for {img_name}')
 
     result = [
-        extract_container_info(container) for container in client.containers.list()
+        extract_container_info(container) for container in client.containers.list(all=True)
         if img_name in get_image_name(container.image)
     ]
 
