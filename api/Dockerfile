@@ -9,7 +9,7 @@ RUN             pip3 install \
                   docker \
                   Flask
 
-COPY            ./* ${WRK_DIR}
+COPY            ./* ${WRK_DIR}/
 
 WORKDIR         ${WRK_DIR}
 EXPOSE          5000

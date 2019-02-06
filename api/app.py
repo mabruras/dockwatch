@@ -13,14 +13,22 @@ app = Flask(__name__)
 def get_applications():
     client = docker.from_env()
 
-    print()
-    result = [
-        {
-            'id': container.image.id.split(':')[-1],
-            'image': get_image_name(container.image),
-            'versions': get_image_versions(container.image)
-        } for container in client.containers.list()
-    ]
+    images = dict()
+
+    for con in client.containers.list():
+        img_id = con.image.id.split(':')[-1]
+        if img_id not in images:
+            images.update({
+                img_id: {
+                    'id': img_id,
+                    'image': get_image_name(con.image),
+                    'versions': list()
+                }
+            })
+
+        images[img_id]['versions'].append(get_container_version(con))
+
+    result = [images[v] for v in images]
 
     client.close()
     return Response(
@@ -30,21 +38,13 @@ def get_applications():
     )
 
 
-@app.route('/images/<img_id>', methods=['GET'])
+@app.route('/images/<img_id>/containers', methods=['GET'])
 @cross_origin()
 def get_app_versions(img_id):
     client = docker.from_env()
 
     result = [
-        {
-            'id': container.id,
-            'name': container.name,
-            'status': container.status,
-            'labels': container.labels,
-            'restarted': container.attrs.get('RestartCount', 0),
-            'state': container.attrs.get('State', dict()),
-            'created': container.attrs.get('Created', None),
-        } for container in client.containers.list()
+        extract_container_info(container) for container in client.containers.list()
         if img_id in container.image.id
     ]
 
@@ -56,16 +56,41 @@ def get_app_versions(img_id):
     )
 
 
+def get_container_version(con):
+    return {
+        'versions': {
+            'name': con.name,
+            'version': get_image_version(con.image),
+        }
+    }
+
+
 def get_image_name(img):
     return img.tags[0].split(':')[0]
 
 
-def get_image_versions(img):
-    return [t.split(':')[-1] for t in img.tags]
+def get_image_version(img):
+    return img.tags[0].split(':')[-1]
+
+
+def extract_container_info(container):
+    return {
+        'id': container.id,
+        'name': container.name,
+        'image': {
+            'id': container.image.id.split(':')[-1],
+            'name': get_image_name(container.image)
+        },
+        'created': container.attrs.get('Created', None),
+        'status': container.status,
+        'labels': container.labels,
+        'restarted': container.attrs.get('RestartCount', 0),
+        'state': container.attrs.get('State', dict()),
+    }
 
 
 if __name__ == '__main__':
     cors = CORS(app)
     app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
 
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=8000)
