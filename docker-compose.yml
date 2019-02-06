@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+
+  web:
+    image: mabruras/dock-watch-web
+    build:
+      context: web
+    restart: unless-stopped
+    container_name: dock-watch-web
+
+    environment:
+    - REACT_APP_API_URL="api:5000"
+    ports:
+    - 3000:3000
+
+  api:
+    image: mabruras/dock-watch-api
+    build:
+      context: api
+    restart: unless-stopped
+    container_name: dock-watch-api
+
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+    - 5000:5000
