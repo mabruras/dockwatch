@@ -16,17 +16,16 @@ def get_applications():
     images = dict()
 
     for con in client.containers.list():
-        img_id = con.image.id.split(':')[-1]
-        if img_id not in images:
+        img_name = get_image_name(con.image)
+        if img_name not in images:
             images.update({
-                img_id: {
-                    'id': img_id,
-                    'image': get_image_name(con.image),
-                    'versions': list()
+                img_name: {
+                    'image': img_name,
+                    'containers': list()
                 }
             })
 
-        images[img_id]['versions'].append(get_container_version(con))
+        images[img_name]['containers'].append(get_container_version(con))
 
     result = [images[v] for v in images]
 
@@ -38,14 +37,16 @@ def get_applications():
     )
 
 
-@app.route('/images/<img_id>/containers', methods=['GET'])
+@app.route('/images/<img_name>/containers', methods=['GET'])
 @cross_origin()
-def get_app_versions(img_id):
+def get_app_versions(img_name):
     client = docker.from_env()
+
+    print(f'getting versions for {img_name}')
 
     result = [
         extract_container_info(container) for container in client.containers.list()
-        if img_id in container.image.id
+        if img_name in get_image_name(container.image)
     ]
 
     client.close()
@@ -58,7 +59,7 @@ def get_app_versions(img_id):
 
 @app.route('/containers/<con_id>/restart', methods=['POST'])
 @cross_origin()
-def remove_container(con_id):
+def restart_container(con_id):
     client = docker.from_env()
 
     try:
@@ -110,15 +111,17 @@ def remove_container(con_id):
 
 def get_container_version(con):
     return {
-        'versions': {
-            'name': con.name,
+        'id': con.id,
+        'name': con.name,
+        'image': {
+            'id': con.image.id.split(':')[-1],
             'version': get_image_version(con.image),
         }
     }
 
 
 def get_image_name(img):
-    return img.tags[0].split(':')[0]
+    return img.tags[0].split(':')[0].replace('/', '-')
 
 
 def get_image_version(img):
