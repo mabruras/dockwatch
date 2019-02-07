@@ -6,6 +6,18 @@ from flask import Flask, Response
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app, origins="*", allow_headers=[
+    'Content-Type', 'Authorization', 'X-Requested-With',
+    'Content-Length', 'Accept', 'Origin'
+])
+
+
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Headers'] = 'Content-Type'
+
+    return response
 
 
 @app.route('/images', methods=['GET'])
@@ -151,7 +163,4 @@ def extract_container_info(container):
 
 
 if __name__ == '__main__':
-    cors = CORS(app)
-    app.config['CORS_HEADERS'] = 'Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin'
-
     app.run(host='0.0.0.0')
