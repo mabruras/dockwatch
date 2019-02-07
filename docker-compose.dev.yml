@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+
+  web-install:
+    image: node:lts
+    command: "npm install"
+    container_name: dock-watch-web-install
+
+    user: 1000:1000
+    volumes:
+    - ./web:/usr/src/app
+    working_dir: /usr/src/app
+
+
+  web:
+    image: node:lts
+    restart: unless-stopped
+    container_name: dock-watch-web
+    command: "npm start"
+
+    environment:
+    - "REACT_APP_API_URL=http://localhost:5000"
+    volumes:
+    - ./web:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+    - 3000:3000
+
+  api:
+    image: mabruras/dock-watch-api
+    build:
+      context: api
+    restart: unless-stopped
+    container_name: dock-watch-api
+
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+    - 5000:5000
