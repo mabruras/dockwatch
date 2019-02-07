@@ -49,40 +49,94 @@ connected towards each API, or a single instance for each API deployed.
 # Usage
 
 ## Build
+Build both components with Docker Compose.
 ```bash
-docker build -t mabruras/dock-watch-api
-docker build -t mabruras/dock-watch-web
+docker-compose build
 ```
 
 ## Deploy
+You can either deploy a single instance of the API, which is
+useful when planning to use a centralized DockWatch Web instance.
 ```bash
 docker run -d \
   -p 5000:5000 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   mabruras/dock-watch-api
+```
 
+If you want to deploy a DockWatch Web instance at the side of
+the API, you can do so afterwards with the following,
+or use Docker Compose.
+```bash
 docker run -d \
   -p 3000:3000 \
   mabruras/dock-watch-web
 ```
 
-## Example setup
+### Docker Compose
+It's important to notice that the docker-compose file contains a
+default to what API the Web instance is connecting towards; localhost.
+To override the APIs default URL, you can set the `DOCK_WATCH_API`
+environment variable being the address to the node running the API.
+```bash
+export DOCK_WATCH_API="http://api.example.com"
+docker-compose up -d
+```
 
-### Prerequisites
+
+## Development
+When developing features it might be useful to avoid
+building the Docker image for each little change.
+
+There is a [`Docker Compose Dev`](./docker-compose.dev.yml)
+for this purpose.
+
+### First run
+Before starting the Web and API, you must install some components.
+The following command will execute `npm install` to download and
+install all necessary dependencies into a `node_modules` directory.
+```bash
+docker-compose -f docker-compose.dev.yml run web-install
+```
+
+### Startup DockWatch
+The following command depends on the `web-install` service to have been
+executed, so the `node_modules` dir is available for the web application.
+```bash
+docker-compose -f docker-compose.dev.yml up web api
+```
+
+Unlike the Web component, you need to rebuild the API if it has any changes.
+As of now, there isn't implemented any live-reload for the Flask application.
+
+
+## Setup
+Usage depends on the setup of you development flow.
+DockWatch is not recommended to be used in a production environment,
+since it lets users with access to the Web and API interact directly
+with the Docker containers for each node.
+
+**As of now, there is no access control for either the components!**
+
+### Example setup
+The following steps are personal tips/preferences for
+creating a pipeline from committing code, to the deploy. 
+
+#### Prerequisites
 * SCM (eg. Git w/`Github`)
 * CI-tool (eg. `Concourse`)
 * CD-tool (eg. `Rundeck`)
 * Proxy (eg. `Traefik`)
 * DockWatch
 
-### Flow
-#### SCM
+#### Flow
+##### SCM
 (_Source Control Management_)
 
 Make commits to the SCM, independent of branch,
 trigger the CI-tool through use of git-hooks.
 
-#### CI
+##### CI
 (_Continuous Integration_)
 
 Let the CI-tool Build/compile,
@@ -122,7 +176,7 @@ Example labels:
 _**TIP:** There could be a parameterized hook to
 auto trigger deployment to development environments_
 
-#### CD
+##### CD
 (_Continuous Deployment_)
 
 After building the Docker image, push it to the registry,
@@ -158,14 +212,14 @@ Example labels:
 * `url=app1.dev.example.com` # _Dependent on Traefik setup,
 container name (`app1` in this case) could represent the sub domain_
 
-#### Proxy
+##### Proxy
 With `TræfIk`/traefik, you'll be able to auto detect
 your Docker containers, and create routes to each container.
 
 So optimal, the earlier example will result in the following accessible URL:
 `https://awesome-app-feature-aa-123-implement-stuff.dev.example.com`
 
-#### DockWatch
+##### DockWatch
 DockWatch API will be running on each of the nodes,
 with a DockWatch Web container at it's side.
 
