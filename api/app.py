@@ -29,11 +29,14 @@ def get_applications():
 
     for con in get_valid_containers(client):
         try:
-            img_name = get_image_name(con.image)
+            img_name = get_image_name(con.image, only_app=True)
             if img_name not in images:
                 images.update({
                     img_name: {
-                        'image': img_name,
+                        'image': {
+                            'name': img_name.split('/')[-1],
+                            'extra': img_name.split('/')[0:-1]
+                        },
                         'status': dict(),
                         'containers': list(),
                     }
@@ -46,7 +49,7 @@ def get_applications():
             statuses = images[img_name]['status']
             statuses.update({con.status: statuses.get(con.status, 0) + 1})
         except Exception as e:
-            print(f'Could not include container: {con}')
+            print(f'Could not include container: {con}, when fetching image: {img_name}')
             print(e)
 
     result = [images[v] for v in images]
@@ -63,8 +66,6 @@ def get_applications():
 @cross_origin()
 def get_app_versions(img_name):
     client = docker.from_env()
-
-    print(f'getting versions for {img_name}')
 
     try:
         result = [
@@ -136,11 +137,18 @@ def remove_container(con_id):
 
 
 def get_valid_containers(client):
-    return [con for con in client.containers.list(all=True) if not hidden_container(con)]
+    return [
+        con for con in client.containers.list(all=True)
+        if not hidden_container(con) and not untagged_image(con.image)
+    ]
 
 
 def hidden_container(con):
     return con.labels.get('dockwatch.hidden', 'false').lower() != 'false'
+
+
+def untagged_image(image):
+    return not image.tags
 
 
 def get_container_version(con):
@@ -154,8 +162,10 @@ def get_container_version(con):
     }
 
 
-def get_image_name(img):
-    return img.tags[0].split(':')[0].replace('/', '-')
+def get_image_name(img, only_app=False):
+    name = img.tags[0].split(':')[0]
+
+    return name.split('/')[-1] if only_app else name
 
 
 def get_image_version(img):
@@ -168,7 +178,8 @@ def extract_container_info(container):
         'name': container.name,
         'image': {
             'id': container.image.id.split(':')[-1],
-            'name': get_image_name(container.image)
+            'name': get_image_name(container.image),
+            'version': get_image_version(container.image),
         },
         'created': container.attrs.get('Created', None),
         'status': container.status,

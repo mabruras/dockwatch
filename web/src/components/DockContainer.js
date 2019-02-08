@@ -40,6 +40,10 @@ const ContainerName = styled.h2`
     font-size: 1.4rem;
   }
   `;
+const ImageNameWrapper = styled.h4`
+  margin: 0;
+  color: #555;
+`;
 
 const ContainerState = styled.div`
   display: flex;
@@ -145,12 +149,16 @@ export default function DockContainer({ container, handleRefetch }) {
     </ContainerTag>
       <ContainerName>
         {container.name}
-      </ContainerName>    
+      </ContainerName>
+
     </ContainerNameWrapper>
-      
+
       <ContainerState>
       <DockContainerState container={container} />
       </ContainerState>
+        <ImageNameWrapper>
+            {container.image.name}:{container.image.version}
+        </ImageNameWrapper>
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }

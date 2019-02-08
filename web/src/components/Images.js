@@ -33,6 +33,7 @@ const StyledName = styled.h2`
   font-weight: bold;
   color:  ${props => props.color};
   text-transform: uppercase;
+  margin: 0.5rem 0;
 `;
 
 const ImagesGrid = styled.div`
@@ -56,7 +57,6 @@ const ImageItem = styled(Flex)`
 `;
 const Versions = styled.div`
   display: flex;
-
   `;
 
 const VersionLabel = styled.span`
@@ -73,6 +73,16 @@ const ContainerStatus = styled.span``;
 const ContainerStatusAmount = styled.span`
   margin-left: 0.5rem;
   font-weight: bold;
+`;
+
+const NameExtras = styled.div`
+  margin: 0.5rem 0;
+  `;
+
+const ImageExtraName = styled.p`
+  color: #777;
+  font-weight: bold;
+  margin: 0;
 `;
 
 export default function Images() {
@@ -115,13 +125,19 @@ export default function Images() {
                 child
                 basis="32%"
                 gutterBottom
-                key={c.image}
+                key={c.image.name}
                 alignItems="center"
                 justify="center"
               >
-                <StyledImageLink to={`/${c.image}`}>
+                <StyledImageLink to={`/${c.image.name}`}>
                   <StyledImage>
-                    <StyledName color={determineColorForString(c.image)}>{c.image} ({c.containers.length})</StyledName>
+                      <NameExtras>
+                          {c.image.extra.map( e => (
+                              <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
+                          ))}
+                      </NameExtras>
+                    <StyledName color={determineColorForString(c.image.name)}>{c.image.name} ({c.containers.length})</StyledName>
+
                     <Versions>
                     {Object.keys(c.status).map(status => (
                        <VersionLabel key={status} color={determineColorForString(status + "STATUS")}>
