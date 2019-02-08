@@ -28,22 +28,26 @@ def get_applications():
     images = dict()
 
     for con in get_valid_containers(client):
-        img_name = get_image_name(con.image)
-        if img_name not in images:
-            images.update({
-                img_name: {
-                    'image': img_name,
-                    'status': dict(),
-                    'containers': list(),
-                }
-            })
+        try:
+            img_name = get_image_name(con.image)
+            if img_name not in images:
+                images.update({
+                    img_name: {
+                        'image': img_name,
+                        'status': dict(),
+                        'containers': list(),
+                    }
+                })
 
-        images[img_name]['containers'].append(get_container_version(con))
+            images[img_name]['containers'].append(get_container_version(con))
 
-        # Updates total status counter
-        # with each containers status
-        statuses = images[img_name]['status']
-        statuses.update({con.status: statuses.get(con.status, 0) + 1})
+            # Updates total status counter
+            # with each containers status
+            statuses = images[img_name]['status']
+            statuses.update({con.status: statuses.get(con.status, 0) + 1})
+        except Exception as e:
+            print(f'Could not include container: {con}')
+            print(e)
 
     result = [images[v] for v in images]
 
@@ -62,10 +66,14 @@ def get_app_versions(img_name):
 
     print(f'getting versions for {img_name}')
 
-    result = [
-        extract_container_info(container) for container in get_valid_containers(client)
-        if img_name in get_image_name(container.image)
-    ]
+    try:
+        result = [
+            extract_container_info(container) for container in get_valid_containers(client)
+            if img_name in get_image_name(container.image)
+        ]
+    except Exception as e:
+        print(f'Could not fetch containers for image {img_name}')
+        print(e)
 
     client.close()
     return Response(
