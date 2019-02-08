@@ -112,10 +112,15 @@ export default function DockContainer({ container, handleRefetch }) {
     }, 
   });
 
-  
+  let containerHref = container.labels[
+      Object.keys(container.labels).find(k => {
+        return k === `${process.env.REACT_APP_URL_LBL}`
+      })
+      ] || '#';
+
   return (
     <DockContainerWrapper>
-    <StyledObjectLink href={`https://not-implemented-yet.no`} target="_blank">
+    <StyledObjectLink href={containerHref}>
       <ContainerName>
         <ContainerTag color={determineColorForString(container.name)}>#</ContainerTag>
         {container.name}
