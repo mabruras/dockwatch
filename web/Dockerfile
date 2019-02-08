@@ -4,8 +4,8 @@ ENV             WRK_DIR /opt/dock-watch-web
 WORKDIR         ${WRK_DIR}
 
 COPY            ./ ${WRK_DIR}/
-RUN             npm install
+RUN             yarn install
 
-EXPOSE          5000
+EXPOSE          3000
 
-CMD             [ "npm", "start" ]
+CMD             [ "yarn", "start" ]
