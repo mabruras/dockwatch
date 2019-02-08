@@ -81,8 +81,21 @@ or use Docker Compose.
 ```bash
 docker run -d \
   -p 3000:3000 \
+  -e "REACT_APP_API_URL=http://localhost:5000" \
   mabruras/dock-watch-web
 ```
+
+### Environment Variables
+#### API
+| VARIABLE | EXAMPLE | DESCRIPTION |
+| :------: | :-----: | :---------: |
+| - | - | - |
+
+#### Web
+| VARIABLE | EXAMPLE | DESCRIPTION |
+| -------- | ------- | ----------- |
+| REACT_APP_API_URL | http://localhost:5000 | URL for where to access the DockWatch API |
+| REACT_APP_URL_LBL | traefik.frontend.rule | What label referring to the applications URL |
 
 ### Docker Compose
 It's important to notice that the docker-compose file contains a
