@@ -1,7 +1,11 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import moment from 'moment';
 
-
+const ContainerCreatedAt = styled.span`
+  color: #fff;
+  margin-left: 0.5rem;
+`;
 
 const StyledRunningStateInfo = styled.span`
  font-weight: bold;
@@ -20,18 +24,64 @@ const StyledRunningStateInfo = styled.span`
   `}
   `;
 
-export default function DockContainerState({ containerState }) {
+const DaysOldLabelWrapper = styled.span`
+  color: #777;
+  margin: 0 0.5rem;
+`;  
+const DaysOldLabel = styled.span`
+  margin-right: 3px;
+  color: ${props => props.color};
+`;
 
-  if (!containerState) {
+export default function DockContainerState({ container }) {
+
+  const { state } = container;
+  console.log(container)
+  if (!state) {
     return null;
   }
+
+  function renderDate(state) {
+    switch(state.Status.toUpperCase()) {
+      case "RUNNING":
+        return `Started ${moment(state.StartedAt).calendar().toLocaleLowerCase()}`;
+      case "EXITED":
+      return `Finished ${moment(state.FinishedAt).calendar().toLocaleLowerCase()}`;
+      default:
+      return `Created ${moment(container.created).calendar().toLocaleLowerCase()}`;
+    }
+  }
+
+  function determineDaysOld(daysSinceCreation) {
+    if(daysSinceCreation === 0) {
+      return "lime";
+    }
+
+    if(daysSinceCreation < 7) {
+      return "green";
+    }
+
+    if (daysSinceCreation >= 7 && daysSinceCreation < 14) {
+      return "salmon";
+    }
+
+    if (daysSinceCreation >= 14) {
+      return "red";
+    }
+  }
+
+  const daysOld = moment().diff(moment(container.created), 'days');
   
   return (
     <StyledRunningStateInfo 
-        dead={containerState.Dead}
-        running={containerState.Running}
-        paused={containerState.Paused}
-        restarted={containerState.Restarting}
-      >{containerState.Status.toUpperCase()}</StyledRunningStateInfo>
+        dead={state.Dead}
+        running={state.Running}
+        paused={state.Paused}
+        restarted={state.Restarting}
+      >
+      {state.Status.toUpperCase()}
+      <ContainerCreatedAt>{renderDate(state)}</ContainerCreatedAt>
+      <DaysOldLabelWrapper>(<DaysOldLabel color={determineDaysOld(daysOld)}>{daysOld}</DaysOldLabel> day{daysOld === 1 ? '' : 's'} old) </DaysOldLabelWrapper>
+      </StyledRunningStateInfo>
   );
 }

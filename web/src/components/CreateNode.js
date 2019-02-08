@@ -1,22 +1,13 @@
-import React, { useState, useContext } from "react";
-import styled, { css } from "styled-components";
+import React, { useState, useContext, useEffect } from "react";
+import styled from "styled-components";
 import { fadeInBottom } from "../utils/animations";
 import useApi from "../hooks/useApi";
-import Busy from "./Busy";
-import { UserContext } from "../context/UserContext";
 import { TitleContext } from "../context/AppTitleContext";
-import LoginHandler from "./LoginHandler";
 import determineColorForString from "../utils/determineColorForString";
-import NoContentFound from "./NoResults";
 import Flex from "../styleguides/Flex";
 
 const CreateNodeWrapper = styled.div`
-  ${props =>
-    !props.loggedIn &&
-    css`
-      padding: 2rem;
-      text-align: center;
-    `};
+ 
 `;
 
 const InputWrapper = styled.div`
@@ -41,7 +32,7 @@ const StyledInput = styled.input`
   width: 100%;
   height: 135px;
 
-  &::placeholder {
+  &::placeholder { 
     color: #777;
     font-family: "Roboto", sans-serif;
   }
@@ -96,6 +87,7 @@ const CreateNodeButtonWrapper = styled.div`
   display: flex;
   width: 100%;
   height: 40px;
+  import { TitleContext } from '../context/AppTitleContext';
   background-color: #111;
 `;
 
@@ -124,9 +116,9 @@ const Error = styled.p`
   margin: 0;
   padding: 0.5rem 0;
   font-size: 1.5rem;
-  animation: ${fadeInBottom} 0.25s ease-in-out 0s 1;
+  animation: ${fadeInBottom} 0.25s eauseEffect-out 0s 1;
 
-  @media all and (max-width: 600px) {
+  @media all and (max-width: 600px) {useEffect
     font-size: 0.9rem;
   }
 `;
@@ -134,42 +126,28 @@ const Error = styled.p`
 const NODE_NAME_MAX_LENGTH = 25;
 const NODE_DESCRIPTION_MAX_LENGTH = 100;
 
-export default function CreateNode(props) {
+export default function CreateNode() {
+
   const { dispatch } = useContext(TitleContext);
-  const userContext = useContext(UserContext);
-  const [hasLoadedCategory, setHasLoadedCategory] = useState(false);
   const [nodeName, setNodeName] = useState("");
   const [nodeDescription, setNodeDescription] = useState("");
   const [createNodeError, setCreateNodeError] = useState(undefined);
 
-  const {
-    match: {
-      params: { categoryId }
-    }
-  } = props;
 
-  const [fetchingCategory, category] = useApi({
-    endpoint: `categories/${categoryId}`,
-    fetchOnMount: true,
-    initialData: null,
-    onSuccess: currentCategory => {
-      setHasLoadedCategory(true);
-      dispatch({
-        type: "set-title",
-        data: {
-          title: "Opprett kanal",
-          titleColor: "#624694"
-        }
-      });
-    },
-    onError: e => {
-      setHasLoadedCategory(true);
-    }
-  });
+  useEffect(() => {
+    dispatch({
+      type: 'set-title',
+      data: {
+        title: "Create Node",
+        titleColor: determineColorForString("nodes")
+      }
+    });
+  }, []);
+
 
   // eslint-disable-next-line
   const [creating, res, err, submitNewNode] = useApi({
-    endpoint: `categories/${categoryId}/nodes`,
+    endpoint: `categories/1/nodes`,
     method: "POST",
     body: {
       name: nodeName.trim(),
@@ -177,10 +155,9 @@ export default function CreateNode(props) {
     },
     onSuccess: newNode => {
       resetInput();
-      props.history.push(`/${categoryId}/${newNode._id}`);
     },
     onError: e => {
-      setCreateNodeError("Wops! Klarte ikke opprette kanalen.");
+      setCreateNodeError("Wops! Couldn't create node.");
     }
   });
 
@@ -205,14 +182,9 @@ export default function CreateNode(props) {
     );
   }
 
-  if (hasLoadedCategory && (category === undefined || category === null)) {
-    return <NoContentFound label="Fant ikke kanalen du lette etter.." />;
-  }
 
   return (
-    <Busy busy={creating || fetchingCategory}>
-      <CreateNodeWrapper loggedIn={userContext.data.loggedIn}>
-        {userContext.data.loggedIn ? (
+      <CreateNodeWrapper>
           <>
             <InputWrapper>
               <NodeTag color={determineColorForString(nodeName)}>
@@ -220,7 +192,7 @@ export default function CreateNode(props) {
               </NodeTag>
               <StyledInput
                 disabled={creating}
-                placeholder="Gi kanalen et navn.."
+                placeholder="Node name.."
                 value={nodeName}
                 onChange={e =>
                   handleInputChange(e, setNodeName, NODE_NAME_MAX_LENGTH)
@@ -229,12 +201,12 @@ export default function CreateNode(props) {
             </InputWrapper>
             {nodeName.trim().length === NODE_NAME_MAX_LENGTH - 1 &&
               renderError(
-                `Navnet kan ikke være lengre enn ${NODE_NAME_MAX_LENGTH} tegn.`
+                `Node name cannot be longer than ${NODE_NAME_MAX_LENGTH} characters.`
               )}
             <StyledTextArea
               disabled={creating}
-              placeholder={`(Valgfritt) Angi en kort beskrivelse av ${nodeName.trim() ||
-                "kanalen"}..`}
+              placeholder={`Base URL of ${nodeName.trim() ||
+                "the node"}..`}
               value={nodeDescription}
               onChange={e =>
                 handleInputChange(
@@ -247,7 +219,7 @@ export default function CreateNode(props) {
             {nodeDescription.trim().length ===
               NODE_DESCRIPTION_MAX_LENGTH - 1 &&
               renderError(
-                `Beskrivelsen kan ikke være lengre enn ${NODE_DESCRIPTION_MAX_LENGTH} tegn.`
+                `Base URL cannot be longer than ${NODE_DESCRIPTION_MAX_LENGTH} characters.`
               )}
             <CreateNodeButtonWrapper>
               {nodeName.length > 0 && nodeName.trim().length > 0 && (
@@ -261,10 +233,6 @@ export default function CreateNode(props) {
                 createNodeError
               )}
           </>
-        ) : (
-          <LoginHandler buttonText="Logg inn for å opprette en ny kanal" />
-        )}
       </CreateNodeWrapper>
-    </Busy>
   );
 }
