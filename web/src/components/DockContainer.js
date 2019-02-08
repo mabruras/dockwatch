@@ -1,9 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import determineColorForString from '../utils/determineColorForString';
-import moment from 'moment';
 import DockContainerState from './DockContainerState';
 import useApi from '../hooks/useApi';
+import { loading } from '../icons';
+import { spin } from '../utils/animations';
+
 const DockContainerWrapper = styled.div`
   display: flex;
   justify-content: space-between;
@@ -22,9 +24,17 @@ const StyledObjectLink = styled.a`
   cursor: pointer;
 `;
 
+const ContainerNameWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0;
+
+`;
+
 const ContainerName = styled.h2`
   color: #946ddc;
-  margin: 0.5rem 0;
+  margin: 0;
+  padding: 0;
 
   @media all and (max-width: 450px) {
     font-size: 1.4rem;
@@ -32,16 +42,14 @@ const ContainerName = styled.h2`
   `;
 
 const ContainerState = styled.div`
+  display: flex;
+  align-items: center;
 
-`;
-
-const ContainerCreatedAt = styled.span`
-  color: #fff;
-  margin-left: 0.5rem;
 `;
 
 const ContainerTag = styled.span`
   margin-right: 10px;
+  font-size: 1.8rem;
   color: ${props => props.color};
 `;
 
@@ -78,8 +86,10 @@ const Remove = styled(StyledActionButton)`
   color: salmon;
 `;
 
+
 const Restart = styled(StyledActionButton)`
   color: orange;
+}
 `;
 
 const StyledMessage = styled.p`
@@ -87,11 +97,19 @@ const StyledMessage = styled.p`
   color: #fff;
 `;
 
+const Spinner = styled.span`
+  svg {
+    animation: ${spin} 4s infinite linear;
+  }
+  
+`;
+
 export default function DockContainer({ container, handleRefetch }) {
   
   if (!container) {
     return null;
   }
+
   // eslint-disable-next-line
   const [restartingContainer, restartResponse, err1, restartContainer] = useApi({
     endpoint: `containers/${container.id}/restart`,
@@ -121,18 +139,18 @@ export default function DockContainer({ container, handleRefetch }) {
   return (
     <DockContainerWrapper>
     <StyledObjectLink href={containerHref}>
+    <ContainerNameWrapper>
+    <ContainerTag color={determineColorForString(container.name)}>
+          { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
+    </ContainerTag>
       <ContainerName>
-        <ContainerTag color={determineColorForString(container.name)}>#</ContainerTag>
         {container.name}
-      </ContainerName>
+      </ContainerName>    
+    </ContainerNameWrapper>
       
       <ContainerState>
-       <DockContainerState containerState={container.state} />
-       <ContainerCreatedAt>Started {moment(container.created).calendar().toLocaleLowerCase()}</ContainerCreatedAt> 
+      <DockContainerState container={container} />
       </ContainerState>
-      {
-        restartingContainer && <StyledMessage>Restarting..</StyledMessage>
-      }
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }

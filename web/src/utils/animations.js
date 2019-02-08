@@ -27,3 +27,12 @@ export const scaleX = keyframes`
     transform: scale(1);
   }
 `;
+
+export const spin = keyframes`
+0% {
+    transform: rotate(360deg);
+}
+100% {
+    transform: rotate(0deg);
+}
+`;

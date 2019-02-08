@@ -20,7 +20,6 @@ const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
 
 const StyledImage = styled.div`
   padding: 4rem;
-  background-color: #222;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,9 +38,12 @@ const StyledName = styled.h2`
 const ImagesGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 `;
 
 const ImageItem = styled(Flex)`
+  margin: 0.5rem;
+
   @media all and (max-width: 900px) {
     flex-basis: 50%;
   }
@@ -49,6 +51,8 @@ const ImageItem = styled(Flex)`
   @media all and (max-width: 600px) {
     flex-basis: 100%;
   }
+
+  background-color: ${props => props.color ? props.color : '#222'};
 `;
 const Versions = styled.div`
   display: flex;
@@ -94,19 +98,22 @@ export default function Images() {
         <ImagesGrid>
           <ImageItem
             child
-            basis="33%"
+            basis="32%"
             gutterBottom
             alignItems="center"
             justify="center"
             fullWidth
+            color={"#62469452"}
           >
-            <StyledName color={determineColorForString("Create")}>+ CREATE NEW</StyledName>
+          <StyledImageLink to={`/nodes`}>
+            <StyledName color={"#fff"}>Change Node</StyledName>
+          </StyledImageLink>
           </ImageItem>
           {images.map(c => {
             return (
               <ImageItem
                 child
-                basis="33%"
+                basis="32%"
                 gutterBottom
                 key={c.image}
                 alignItems="center"

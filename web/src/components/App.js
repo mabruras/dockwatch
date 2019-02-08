@@ -9,6 +9,8 @@ import history from '../utils/history';
 import goBack from '../utils/goBack';
 import { arrowBack } from '../icons';
 import { TitleContext } from '../context/AppTitleContext';
+import CreateNode from './CreateNode';
+import Nodes from './Nodes';
 
 const AppTitleWrapper = styled.nav`
   background: #111;
@@ -86,6 +88,8 @@ export default function App(props) {
       </Flex>
       <Switch>
         <Route path="/" exact component={Images} />
+        <Route path="/nodes" exact component={Nodes} />
+        <Route path="/nodes/create" exact component={CreateNode} />
         <Route path="/:imageId" exact component={Containers} />
       </Switch>
     </>
