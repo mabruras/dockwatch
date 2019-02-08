@@ -27,7 +27,7 @@ def get_applications():
 
     images = dict()
 
-    for con in client.containers.list(all=True):
+    for con in get_valid_containers(client):
         img_name = get_image_name(con.image)
         if img_name not in images:
             images.update({
@@ -63,7 +63,7 @@ def get_app_versions(img_name):
     print(f'getting versions for {img_name}')
 
     result = [
-        extract_container_info(container) for container in client.containers.list(all=True)
+        extract_container_info(container) for container in get_valid_containers(client)
         if img_name in get_image_name(container.image)
     ]
 
@@ -125,6 +125,14 @@ def remove_container(con_id):
         mimetype='application/json',
         status=200,
     )
+
+
+def get_valid_containers(client):
+    return [con for con in client.containers.list(all=True) if not hidden_container(con)]
+
+
+def hidden_container(con):
+    return con.labels.get('dockwatch.hidden', 'false').lower() != 'false'
 
 
 def get_container_version(con):
