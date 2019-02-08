@@ -8,6 +8,8 @@ services:
       context: web
     restart: unless-stopped
     container_name: dock-watch-web
+    labels:
+    - "dockwatch.hidden=true"
 
     environment:
     - "REACT_APP_API_URL=${DOCK_WATCH_API:-http://localhost:5000}"
@@ -20,6 +22,8 @@ services:
       context: api
     restart: unless-stopped
     container_name: dock-watch-api
+    labels:
+      - "dockwatch.hidden=true"
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock

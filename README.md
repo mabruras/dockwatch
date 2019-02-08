@@ -27,6 +27,17 @@ it's possible to deploy one single instance of DockWatch Web and
 applying DockWatch API references in the Web UI.
 
 
+## Internal Labels
+Internal labels are those who DockWatch uses for execute extra,
+custom or special logic, when detecting on a container.
+
+### Hidden containers
+It's not everything that should be exposed to the users,
+that's why a container can be hidden from DockWatch.
+By default services like DockWatch should be hidden,
+and should be labeled with `dockwatch.hidden=true`.
+
+
 # Components
 System consist of two components, API and Web.
 
