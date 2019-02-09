@@ -7,13 +7,16 @@ import * as serviceWorker from './serviceWorker';
 import 'react-tippy/dist/tippy.css';
 import history from './utils/history';
 import { TitleContextProvider } from './context/AppTitleContext';
+import SelectedNodeProvider from './context/SelectedNodeContext';
 
 ReactDOM.render(
   <Router history={history}>
+    <SelectedNodeProvider>
       <TitleContextProvider>
-        <App />
+          <App />
       </TitleContextProvider>
-  </Router>,
+    </SelectedNodeProvider>
+      </Router>,
   document.getElementById('root')
 );
 

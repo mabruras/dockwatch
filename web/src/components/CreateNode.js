@@ -5,10 +5,9 @@ import useApi from "../hooks/useApi";
 import { TitleContext } from "../context/AppTitleContext";
 import determineColorForString from "../utils/determineColorForString";
 import Flex from "../styleguides/Flex";
+import { isWebUri } from 'valid-url';
 
-const CreateNodeWrapper = styled.div`
- 
-`;
+const CreateNodeWrapper = styled.div``;
 
 const InputWrapper = styled.div`
   width: 100%;
@@ -32,7 +31,7 @@ const StyledInput = styled.input`
   width: 100%;
   height: 135px;
 
-  &::placeholder { 
+  &::placeholder {
     color: #777;
     font-family: "Roboto", sans-serif;
   }
@@ -118,25 +117,23 @@ const Error = styled.p`
   font-size: 1.5rem;
   animation: ${fadeInBottom} 0.25s eauseEffect-out 0s 1;
 
-  @media all and (max-width: 600px) {useEffect
-    font-size: 0.9rem;
+  @media all and (max-width: 600px) {
+    useeffectfont-size: 0.9rem;
   }
 `;
 
-const NODE_NAME_MAX_LENGTH = 25;
-const NODE_DESCRIPTION_MAX_LENGTH = 100;
+const NODE_NAME_MAX_LENGTH = 50;
+const NODE_URL_MAX_LENGTH = 500;
 
 export default function CreateNode() {
-
   const { dispatch } = useContext(TitleContext);
   const [nodeName, setNodeName] = useState("");
-  const [nodeDescription, setNodeDescription] = useState("");
+  const [nodeBaseUrl, setNodeDescription] = useState("");
   const [createNodeError, setCreateNodeError] = useState(undefined);
-
 
   useEffect(() => {
     dispatch({
-      type: 'set-title',
+      type: "set-title",
       data: {
         title: "Create Node",
         titleColor: determineColorForString("nodes")
@@ -144,14 +141,13 @@ export default function CreateNode() {
     });
   }, []);
 
-
   // eslint-disable-next-line
   const [creating, res, err, submitNewNode] = useApi({
     endpoint: `categories/1/nodes`,
     method: "POST",
     body: {
       name: nodeName.trim(),
-      description: nodeDescription.trim()
+      description: nodeBaseUrl.trim()
     },
     onSuccess: newNode => {
       resetInput();
@@ -182,57 +178,53 @@ export default function CreateNode() {
     );
   }
 
-
   return (
-      <CreateNodeWrapper>
-          <>
-            <InputWrapper>
-              <NodeTag color={determineColorForString(nodeName)}>
-                #
-              </NodeTag>
-              <StyledInput
-                disabled={creating}
-                placeholder="Node name.."
-                value={nodeName}
-                onChange={e =>
-                  handleInputChange(e, setNodeName, NODE_NAME_MAX_LENGTH)
-                }
-              />
-            </InputWrapper>
-            {nodeName.trim().length === NODE_NAME_MAX_LENGTH - 1 &&
-              renderError(
-                `Node name cannot be longer than ${NODE_NAME_MAX_LENGTH} characters.`
-              )}
-            <StyledTextArea
-              disabled={creating}
-              placeholder={`Base URL of ${nodeName.trim() ||
-                "the node"}..`}
-              value={nodeDescription}
-              onChange={e =>
-                handleInputChange(
-                  e,
-                  setNodeDescription,
-                  NODE_DESCRIPTION_MAX_LENGTH
-                )
-              }
-            />
-            {nodeDescription.trim().length ===
-              NODE_DESCRIPTION_MAX_LENGTH - 1 &&
-              renderError(
-                `Base URL cannot be longer than ${NODE_DESCRIPTION_MAX_LENGTH} characters.`
-              )}
-            <CreateNodeButtonWrapper>
-              {nodeName.length > 0 && nodeName.trim().length > 0 && (
-                <CreateNodeButton onClick={submitNewNode}>
-                  <CreateNodeButtonText>OPPRETT</CreateNodeButtonText>
-                </CreateNodeButton>
-              )}
-            </CreateNodeButtonWrapper>
-            {createNodeError &&
-              renderError(
-                createNodeError
-              )}
-          </>
-      </CreateNodeWrapper>
+    <CreateNodeWrapper>
+      <>
+        <InputWrapper>
+          <NodeTag color={determineColorForString(nodeName)}>#</NodeTag>
+          <StyledInput
+            disabled={creating}
+            placeholder="Node name (e.g. Docker Watch API 1).."
+            value={nodeName}
+            onChange={e =>
+              handleInputChange(e, setNodeName, NODE_NAME_MAX_LENGTH)
+            }
+          />
+        </InputWrapper>
+        {nodeName.trim().length === NODE_NAME_MAX_LENGTH - 1 &&
+          renderError(
+            `Node name cannot be longer than ${NODE_NAME_MAX_LENGTH} characters.`
+          )}
+        <StyledTextArea
+          disabled={creating}
+          placeholder={`Base URL of ${nodeName.trim() || "the node"} (ex. http://localhost:3000)..`}
+          value={nodeBaseUrl}
+          onChange={e =>
+            handleInputChange(e, setNodeDescription, NODE_URL_MAX_LENGTH)
+          }
+        />
+        {nodeBaseUrl.trim().length > 4 && !nodeBaseUrl.trim().startsWith("http") &&
+          renderError(
+            `The URL should start with http:// or https://.`
+          )}
+        {nodeBaseUrl.trim().length === NODE_URL_MAX_LENGTH - 1 &&
+          renderError(
+            `URL cannot be longer than ${NODE_URL_MAX_LENGTH} characters.`
+          )}
+        <CreateNodeButtonWrapper>
+          {
+            nodeName.trim().length > 0 &&
+            nodeBaseUrl.trim().length > 0 && 
+            isWebUri(nodeBaseUrl) &&
+            (
+              <CreateNodeButton onClick={submitNewNode}>
+                <CreateNodeButtonText>CREATE</CreateNodeButtonText>
+              </CreateNodeButton>
+            )}
+        </CreateNodeButtonWrapper>
+        {createNodeError && renderError(createNodeError)}
+      </>
+    </CreateNodeWrapper>
   );
 }

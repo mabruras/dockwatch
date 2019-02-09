@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import determineColorForString from '../utils/determineColorForString';
+import { SelectedNodeContext } from '../context/SelectedNodeContext';
 
 const StyledObjectLink = styled(({ ...props }) => <Link {...props} />)`
   display: flex;
@@ -27,15 +28,20 @@ const ChannelTag = styled.span`
   color: ${props => props.color};
 `;
 
-export default function CreateNodeItem() {
-  
+export default function DefaultNodeItem() {
+  const selectedNodeContext = useContext(SelectedNodeContext);
+
+  if (!selectedNodeContext.data || !selectedNodeContext.data.id) {
+    return null;
+  }
+
   return (
     <StyledObjectLink to={`/nodes/create`}>
       <ChannelName>
-        <ChannelTag color={determineColorForString("Create Node")}>+</ChannelTag>
-        Create new Node
+        <ChannelTag color={determineColorForString("Default Node")}>#</ChannelTag>
+          {selectedNodeContext.data.name}
       </ChannelName>
-      <ChannelDescription>Click here to create a new Node.</ChannelDescription>
+      <ChannelDescription> {selectedNodeContext.data.baseUrl}</ChannelDescription>
     </StyledObjectLink>
   );
 }

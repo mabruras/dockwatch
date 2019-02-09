@@ -1,5 +1,5 @@
 import storage from './storage';
 
-const userStorage = storage('__komntrUser__');
+const nodeStorage = storage('__selectedNode__');
 
-export { userStorage };
+export { nodeStorage };
