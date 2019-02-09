@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { userStorage } from '../utils/storageKeys';
+import { useState, useEffect, useContext } from 'react';
+import { SelectedNodeContext } from '../context/SelectedNodeContext';
 
 /**
  * Custom hook for API-calls
@@ -20,6 +20,7 @@ export default function useApi(opts) {
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState(opts.initialData);
   const [error, setError] = useState(null);
+  const selectedNodeContext = useContext(SelectedNodeContext);
 
   async function fetchData() {
     try {
@@ -31,16 +32,8 @@ export default function useApi(opts) {
         }
       };
 
-      const accessToken = userStorage.get()
-        ? userStorage.get().accessToken
-        : null;
-
-      if (accessToken) {
-        headers.headers.authorization = `Bearer ${accessToken.token}`;
-      }
-
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/${opts.endpoint}`,
+        `${selectedNodeContext.data.baseUrl}/${opts.endpoint}`,
         {
           ...headers,
           method: opts.method || 'GET',
@@ -54,7 +47,8 @@ export default function useApi(opts) {
 
       if(!ok) {
         if (typeof opts.onError === 'function') {
-          opts.onError("En feil oppstod.");
+          setBusy(false);
+          opts.onError("An error occurred.");
         }
         return;
       }
@@ -77,7 +71,7 @@ export default function useApi(opts) {
       }
     } catch (error) {
       setError(error);
-
+      setBusy(false);
       if (typeof opts.onError === 'function') {
         opts.onError(error);
       }

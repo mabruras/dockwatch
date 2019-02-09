@@ -1,12 +1,13 @@
-import React, { useContext, useEffect } from 'react';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
-import Container from '../styleguides/Container';
-import Flex from '../styleguides/Flex';
-import determineColorForString from '../utils/determineColorForString';
-import { TitleContext } from '../context/AppTitleContext';
-import useApi from '../hooks/useApi';
-import Busy from './Busy';
+import React, { useContext, useEffect } from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
+import Container from "../styleguides/Container";
+import Flex from "../styleguides/Flex";
+import determineColorForString from "../utils/determineColorForString";
+import { TitleContext } from "../context/AppTitleContext";
+import useApi from "../hooks/useApi";
+import Busy from "./Busy";
+import { SelectedNodeContext } from "../context/SelectedNodeContext";
 
 const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
   text-align: center;
@@ -31,7 +32,7 @@ const StyledImage = styled.div`
 const StyledName = styled.h2`
   font-size: 2rem;
   font-weight: bold;
-  color:  ${props => props.color};
+  color: ${props => props.color};
   text-transform: uppercase;
   margin: 0.5rem 0;
 `;
@@ -53,11 +54,11 @@ const ImageItem = styled(Flex)`
     flex-basis: 100%;
   }
 
-  background-color: ${props => props.color ? props.color : '#222'};
+  background-color: ${props => (props.color ? props.color : "#222")};
 `;
 const Versions = styled.div`
   display: flex;
-  `;
+`;
 
 const VersionLabel = styled.span`
   margin: 5px;
@@ -77,7 +78,7 @@ const ContainerStatusAmount = styled.span`
 
 const NameExtras = styled.div`
   margin: 0.5rem 0;
-  `;
+`;
 
 const ImageExtraName = styled.p`
   color: #777;
@@ -87,20 +88,19 @@ const ImageExtraName = styled.p`
 
 export default function Images() {
   const { dispatch } = useContext(TitleContext);
+  const selectedNodeContext = useContext(SelectedNodeContext);
 
   useEffect(() => {
     dispatch({
-      type: 'default-title'
+      type: "default-title"
     });
   }, []);
 
   const [busy, images] = useApi({
-    endpoint: 'images',
+    endpoint: "images",
     fetchOnMount: true,
     initialData: []
   });
-
-  
 
   return (
     <Busy busy={busy}>
@@ -115,9 +115,13 @@ export default function Images() {
             fullWidth
             color={"#62469452"}
           >
-          <StyledImageLink to={`/nodes`}>
-            <StyledName color={"#fff"}>Change Node</StyledName>
-          </StyledImageLink>
+            <StyledImageLink to={`/nodes`}>
+              <ImageExtraName>{selectedNodeContext.data.name}</ImageExtraName>
+              <ImageExtraName>
+                {selectedNodeContext.data.baseUrl}
+              </ImageExtraName>
+              <StyledName color={"#fff"}>Change Node</StyledName>
+            </StyledImageLink>
           </ImageItem>
           {images.map(c => {
             return (
@@ -131,19 +135,27 @@ export default function Images() {
               >
                 <StyledImageLink to={`/${c.image.name}`}>
                   <StyledImage>
-                      <NameExtras>
-                          {c.image.extra.map( e => (
-                              <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
-                          ))}
-                      </NameExtras>
-                    <StyledName color={determineColorForString(c.image.name)}>{c.image.name} ({c.containers.length})</StyledName>
+                    <NameExtras>
+                      {c.image.extra.map(e => (
+                        <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
+                      ))}
+                    </NameExtras>
+                    <StyledName color={determineColorForString(c.image.name)}>
+                      {c.image.name} ({c.containers.length})
+                    </StyledName>
 
                     <Versions>
-                    {Object.keys(c.status).map(status => (
-                       <VersionLabel key={status} color={determineColorForString(status + "STATUS")}>
-                       <ContainerStatus>{`${status}:`}</ContainerStatus><ContainerStatusAmount>{c.status[status]}</ContainerStatusAmount>
-                      </VersionLabel>
-                    ))}
+                      {Object.keys(c.status).map(status => (
+                        <VersionLabel
+                          key={status}
+                          color={determineColorForString(status + "STATUS")}
+                        >
+                          <ContainerStatus>{`${status}:`}</ContainerStatus>
+                          <ContainerStatusAmount>
+                            {c.status[status]}
+                          </ContainerStatusAmount>
+                        </VersionLabel>
+                      ))}
                     </Versions>
                   </StyledImage>
                 </StyledImageLink>
