@@ -8,27 +8,24 @@ import CreateNodeItem from './CreateNodeItem';
 import { SelectedNodeContext, defaultNode } from '../context/SelectedNodeContext';
 import Node from './Node';
 
-export default function Nodes() {
+let nodes = [
+  defaultNode,
+  {
+    id: 'id1',
+    name: 'Node 1',
+    baseUrl: 'http://vg.no'
+  },
+  {
+    id: 'id2',
+    name: 'Magnus',
+    baseUrl: 'http://192.168.0.109:5000/api'
+  }
+];
+
+export default function Nodes(props) {
   
   const { dispatch } = useContext(TitleContext);
   const selectedNodeContext = useContext(SelectedNodeContext);
-
-  let nodes = [
-    {
-      id: 'id1',
-      name: 'Node 1',
-      baseUrl: 'http://vg.no'
-    },
-    {
-      id: 'id2',
-      name: 'Node 2',
-      baseUrl: 'http://localhost:5000'
-    }
-  ];
-
-  if(defaultNode) {
-    nodes = [defaultNode, ...nodes]
-  }
 
   useEffect(() => {
     dispatch({
@@ -41,7 +38,8 @@ export default function Nodes() {
   }, []);
 
   const handleNodeSelected = node => {
-    selectedNodeContext.setData(node)
+    selectedNodeContext.setData(node);
+    props.history.push(`/`);
   }
 
   if (!nodes) return <NoContentFound />;

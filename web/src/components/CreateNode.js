@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import styled from "styled-components";
 import { fadeInBottom } from "../utils/animations";
-import useApi from "../hooks/useApi";
 import { TitleContext } from "../context/AppTitleContext";
 import determineColorForString from "../utils/determineColorForString";
 import Flex from "../styleguides/Flex";
@@ -125,11 +124,10 @@ const Error = styled.p`
 const NODE_NAME_MAX_LENGTH = 50;
 const NODE_URL_MAX_LENGTH = 500;
 
-export default function CreateNode() {
+export default function CreateNode( props ) {
   const { dispatch } = useContext(TitleContext);
-  const [nodeName, setNodeName] = useState("");
-  const [nodeBaseUrl, setNodeDescription] = useState("");
-  const [createNodeError, setCreateNodeError] = useState(undefined);
+  const [name, setNodeName] = useState("");
+  const [baseUrl, setNodeDescription] = useState("");
 
   useEffect(() => {
     dispatch({
@@ -141,25 +139,8 @@ export default function CreateNode() {
     });
   }, []);
 
-  // eslint-disable-next-line
-  const [creating, res, err, submitNewNode] = useApi({
-    endpoint: `categories/1/nodes`,
-    method: "POST",
-    body: {
-      name: nodeName.trim(),
-      description: nodeBaseUrl.trim()
-    },
-    onSuccess: newNode => {
-      resetInput();
-    },
-    onError: e => {
-      setCreateNodeError("Wops! Couldn't create node.");
-    }
-  });
-
-  function resetInput() {
-    setNodeName("");
-    setNodeDescription("");
+  const submitNewNode = () => {
+    props.history.push(`/nodes`);
   }
 
   function handleInputChange(e, stateUpdaterFunc, maxLength) {
@@ -182,48 +163,45 @@ export default function CreateNode() {
     <CreateNodeWrapper>
       <>
         <InputWrapper>
-          <NodeTag color={determineColorForString(nodeName)}>#</NodeTag>
+          <NodeTag color={determineColorForString(name)}>#</NodeTag>
           <StyledInput
-            disabled={creating}
-            placeholder="Node name (e.g. Docker Watch API 1).."
-            value={nodeName}
+            placeholder="Node name (e.g. Dock Watch API 1).."
+            value={name}
             onChange={e =>
               handleInputChange(e, setNodeName, NODE_NAME_MAX_LENGTH)
             }
           />
         </InputWrapper>
-        {nodeName.trim().length === NODE_NAME_MAX_LENGTH - 1 &&
+        {name.trim().length === NODE_NAME_MAX_LENGTH - 1 &&
           renderError(
             `Node name cannot be longer than ${NODE_NAME_MAX_LENGTH} characters.`
           )}
         <StyledTextArea
-          disabled={creating}
-          placeholder={`Base URL of ${nodeName.trim() || "the node"} (ex. http://localhost:3000)..`}
-          value={nodeBaseUrl}
+          placeholder={`Base URL of ${name.trim() || "the node"} (ex. http://localhost:3000)..`}
+          value={baseUrl}
           onChange={e =>
             handleInputChange(e, setNodeDescription, NODE_URL_MAX_LENGTH)
           }
         />
-        {nodeBaseUrl.trim().length > 4 && !nodeBaseUrl.trim().startsWith("http") &&
+        {baseUrl.trim().length > 4 && !baseUrl.trim().startsWith("http") &&
           renderError(
             `The URL should start with http:// or https://.`
           )}
-        {nodeBaseUrl.trim().length === NODE_URL_MAX_LENGTH - 1 &&
+        {baseUrl.trim().length === NODE_URL_MAX_LENGTH - 1 &&
           renderError(
             `URL cannot be longer than ${NODE_URL_MAX_LENGTH} characters.`
           )}
         <CreateNodeButtonWrapper>
           {
-            nodeName.trim().length > 0 &&
-            nodeBaseUrl.trim().length > 0 && 
-            isWebUri(nodeBaseUrl) &&
+            name.trim().length > 0 &&
+            baseUrl.trim().length > 0 && 
+            isWebUri(baseUrl) &&
             (
               <CreateNodeButton onClick={submitNewNode}>
                 <CreateNodeButtonText>CREATE</CreateNodeButtonText>
               </CreateNodeButton>
             )}
         </CreateNodeButtonWrapper>
-        {createNodeError && renderError(createNodeError)}
       </>
     </CreateNodeWrapper>
   );
