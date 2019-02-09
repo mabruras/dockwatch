@@ -1,11 +1,12 @@
 #! /usr/bin/env python3
 import json
+import os
 
 import docker
-from flask import Flask, Response
+from flask import Flask, Response, send_from_directory
 from flask_cors import CORS, cross_origin
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../web/build/static')
 CORS(app, origins="*", allow_headers=[
     'Content-Type', 'Authorization', 'X-Requested-With',
     'Content-Length', 'Accept', 'Origin'
@@ -20,7 +21,19 @@ def after_request(response):
     return response
 
 
-@app.route('/images', methods=['GET'])
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def react(path):
+    print('Path: {}'.format(path))
+    if path != "" and os.path.exists("react_app/build/{}".format(path)):
+        print('Accessing path: {}'.format(path))
+        return send_from_directory('../web/build', path)
+    else:
+        print('Accessing default: {}../web/build/index.html'.format(os.path.curdir))
+        return send_from_directory('../web/build', 'index.html')
+
+
+@app.route('/api/images', methods=['GET'])
 @cross_origin()
 def get_applications():
     client = docker.from_env()
@@ -49,7 +62,7 @@ def get_applications():
             statuses = images[img_name]['status']
             statuses.update({con.status: statuses.get(con.status, 0) + 1})
         except Exception as e:
-            print(f'Could not include container: {con}, when fetching image: {img_name}')
+            print('Could not include container: {}, when fetching image: {}'.format(con, img_name))
             print(e)
 
     result = [images[v] for v in images]
@@ -62,7 +75,7 @@ def get_applications():
     )
 
 
-@app.route('/images/<img_name>/containers', methods=['GET'])
+@app.route('/api/images/<img_name>/containers', methods=['GET'])
 @cross_origin()
 def get_app_versions(img_name):
     client = docker.from_env()
@@ -73,7 +86,7 @@ def get_app_versions(img_name):
             if img_name in get_image_name(container.image)
         ]
     except Exception as e:
-        print(f'Could not fetch containers for image {img_name}')
+        print('Could not fetch containers for image {}'.format(img_name))
         print(e)
 
     client.close()
@@ -84,16 +97,16 @@ def get_app_versions(img_name):
     )
 
 
-@app.route('/containers/<con_id>/restart', methods=['POST'])
+@app.route('/api/containers/<con_id>/restart', methods=['POST'])
 @cross_origin()
 def restart_container(con_id):
     client = docker.from_env()
 
     try:
-        print(f'Restarting container with ID {con_id}')
+        print('Restarting container with ID {}'.format(con_id))
         client.containers.get(con_id).restart()
     except docker.errors.APIError as e:
-        print(f'Failed restarting container with ID {con_id}: \n{e}')
+        print('Failed restarting container with ID {}: \n{}'.format(con_id, e))
         client.close()
         return Response(
             response=e,
@@ -110,16 +123,16 @@ def restart_container(con_id):
     )
 
 
-@app.route('/containers/<con_id>/delete', methods=['DELETE'])
+@app.route('/api/containers/<con_id>/delete', methods=['DELETE'])
 @cross_origin()
 def remove_container(con_id):
     client = docker.from_env()
 
     try:
-        print(f'Removing container with ID {con_id}')
+        print('Removing container with ID {}'.format(con_id))
         client.containers.get(con_id).remove(force=True)
     except docker.errors.APIError as e:
-        print(f'Failed removing container with ID {con_id}: \n{e}')
+        print('Failed removing container with ID {}: \n{}'.format(con_id, e))
         client.close()
         return Response(
             response=e,

@@ -4,7 +4,7 @@ import { nodeStorage } from '../utils/storageKeys';
 const defaultNode = {
   id: '01',
   name: 'Default Node',
-  baseUrl: process.env.REACT_APP_API_URL || window.location.hostname + "/api"
+  baseUrl: process.env.REACT_APP_API_URL || "api"
 };
 
 const SelectedNodeContext = createContext({
