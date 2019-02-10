@@ -24,11 +24,13 @@ function readNodeDataFromStorage() {
 
 export default function SelectedNodeProvider({ children }) {
   const [state, setState] = useState(defaultNode);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     const nodeData = readNodeDataFromStorage();
     setState(nodeData);
-  }, []);
+    setHasLoaded(true);
+}, []);
 
   return (
     <SelectedNodeContext.Provider
@@ -37,7 +39,8 @@ export default function SelectedNodeProvider({ children }) {
         setData: data => { 
             setState(data) 
             nodeStorage.set(data)
-        }
+        },
+        hasLoaded: hasLoaded
       }}
     >
       {children}
