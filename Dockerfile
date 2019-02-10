@@ -1,4 +1,4 @@
-FROM            node:lts
+FROM            node:lts-alpine
 
 ENV             DW_HOME /opt/dockwatch
 
@@ -7,25 +7,27 @@ ENV             DW_HOME /opt/dockwatch
 WORKDIR         ${DW_HOME}/api
 COPY            ./api .
 
-RUN             apt-get update \
-                  && apt-get install -y \
-                    build-essential \
-                    python3-pip \
-                    python3-dev \
-                  && rm -rf /var/lib/apt/lists/*
+RUN             apk update \
+                  && apk add \
+                    --no-cache \
+                    python3 \
+                  && python3 -m ensurepip \
+                  && rm -r /usr/lib/python*/ensurepip
+
 RUN             pip3 install \
                   flask-cors \
                   docker \
-                  Flask
+                  Flask \
+                && rm -r /root/.cache
 
 
-#               Node/React
+#               Yarn/NPM
 WORKDIR         ${DW_HOME}/web
 COPY            ./web .
 RUN             yarn install \
-                && yarn build \
-                && npm install -g react-scripts \
-                && react-scripts build
+                  && yarn --prod build \
+                  && npm install -g react-scripts \
+                  && react-scripts build
 
 
 WORKDIR         ${DW_HOME}
