@@ -10,16 +10,6 @@ import Node from './Node';
 
 let nodes = [
   defaultNode,
-  {
-    id: 'id1',
-    name: 'Node 1',
-    baseUrl: 'http://vg.no'
-  },
-  {
-    id: 'id2',
-    name: 'Magnus',
-    baseUrl: 'http://192.168.0.109:5000/api'
-  }
 ];
 
 export default function Nodes(props) {
