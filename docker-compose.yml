@@ -34,6 +34,8 @@ services:
     image: redis
     restart: unless-stopped
     container_name: dw_redis
+    labels:
+    - "dockwatch.hidden=true"
 
     ports:
     - 6379:6379
