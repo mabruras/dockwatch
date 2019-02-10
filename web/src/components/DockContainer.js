@@ -105,7 +105,6 @@ const Spinner = styled.span`
   svg {
     animation: ${spin} 4s infinite linear;
   }
-  
 `;
 
 export default function DockContainer({ container, handleRefetch }) {

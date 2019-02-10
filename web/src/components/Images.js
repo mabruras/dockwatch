@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { Link } from "react-router-dom";
 import Container from "../styleguides/Container";
 import Flex from "../styleguides/Flex";
@@ -8,6 +8,8 @@ import { TitleContext } from "../context/AppTitleContext";
 import useApi from "../hooks/useApi";
 import Busy from "./Busy";
 import { SelectedNodeContext } from "../context/SelectedNodeContext";
+import { loading } from "../icons";
+import { spin } from "../utils/animations";
 
 const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
   text-align: center;
@@ -86,6 +88,42 @@ const ImageExtraName = styled.p`
   margin: 0;
 `;
 
+const Spinner = styled.span`
+  margin-right: 0.5rem;
+  ${props =>
+    props.isLoading &&
+    css`
+      svg {
+        animation: ${spin} 4s infinite linear;
+      }
+    `}
+`;
+const RefreshNode = styled.button`
+  align-items: center;
+  border: 0;
+  background-color: #62469438;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.5rem 2rem;
+  text-transform: uppercase;
+  transition: all 0.1s ease-in-out;
+  outline: 0;
+  width: 100%;
+  justify-content: center;
+  &:hover {
+    background-color: #62469455;
+  }
+`;
+
+const RefreshNodeWrapper = styled.div`
+  display: flex;
+  margin: 0.5rem;
+  justify-content: center;
+`;
+
 export default function Images() {
   const { dispatch } = useContext(TitleContext);
   const selectedNodeContext = useContext(SelectedNodeContext);
@@ -96,15 +134,21 @@ export default function Images() {
     });
   }, []);
 
-  const [busy, images] = useApi({
+  const [busy, images, error, fetchData] = useApi({
     endpoint: "images",
     fetchOnMount: true,
     initialData: []
   });
 
   return (
-    <Busy busy={busy}>
-      <Container gutterTop>
+    <Container gutterTop>
+      <RefreshNodeWrapper>
+        <RefreshNode onClick={() => fetchData()}>
+          <Spinner isLoading={busy}>{loading}</Spinner> Refresh
+        </RefreshNode>
+      </RefreshNodeWrapper>
+
+      <Busy busy={busy || !selectedNodeContext.hasLoaded}>
         <ImagesGrid>
           <ImageItem
             child
@@ -116,9 +160,15 @@ export default function Images() {
             color={"#62469452"}
           >
             <StyledImageLink to={`/nodes`}>
-              <ImageExtraName>{selectedNodeContext.data.name}</ImageExtraName>
               <ImageExtraName>
-                {selectedNodeContext.data.baseUrl}
+                {selectedNodeContext.hasLoaded
+                  ? selectedNodeContext.data.name
+                  : "Loading.."}
+              </ImageExtraName>
+              <ImageExtraName>
+                {selectedNodeContext.hasLoaded
+                  ? selectedNodeContext.data.baseUrl
+                  : "Loading.."}
               </ImageExtraName>
               <StyledName color={"#fff"}>Change Node</StyledName>
             </StyledImageLink>
@@ -163,7 +213,7 @@ export default function Images() {
             );
           })}
         </ImagesGrid>
-      </Container>
-    </Busy>
+      </Busy>
+    </Container>
   );
 }

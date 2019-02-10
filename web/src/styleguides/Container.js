@@ -8,7 +8,7 @@ const Container = styled.div`
   ${props =>
     props.gutterTop &&
     css`
-      margin-top: 3rem;
+      margin-top: 1rem;
     `};
 `;
 
