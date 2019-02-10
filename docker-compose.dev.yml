@@ -20,7 +20,7 @@ services:
     command: "npm start"
 
     environment:
-    - "REACT_APP_API_URL=http://localhost:5000"
+    - "REACT_APP_API_URL=http://localhost:5000/api"
     volumes:
     - ./web:/usr/src/app
     working_dir: /usr/src/app

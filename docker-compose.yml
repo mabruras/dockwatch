@@ -12,7 +12,7 @@ services:
     - "dockwatch.hidden=true"
 
     environment:
-    - "REACT_APP_API_URL=${DOCK_WATCH_API:-http://localhost:5000}"
+    - "REACT_APP_API_URL=${DOCK_WATCH_API:-http://localhost:5000/api}"
     ports:
     - 3000:3000
 
