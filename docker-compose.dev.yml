@@ -38,3 +38,11 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     ports:
     - 5000:5000
+
+  redis:
+    image: redis
+    restart: unless-stopped
+    container_name: dw_redis
+
+    ports:
+    - 6379:6379
