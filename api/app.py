@@ -89,6 +89,21 @@ def get_app_versions(img_name):
     return ok_response(result)
 
 
+@app.route('/api/containers/<con_id>', methods=['GET'])
+@cross_origin()
+def get_container_info(con_id):
+    client = docker.from_env()
+
+    container = next((extract_container_info(c) for c in get_valid_containers(client) if c.id == con_id), None)
+    if not container:
+        err = 'No container with id {} available'.format(con_id)
+        print(err)
+        return err_response(err, 400)
+
+    client.close()
+    return ok_response(container)
+
+
 @app.route('/api/containers/<con_id>/restart', methods=['POST'])
 @cross_origin()
 def restart_container(con_id):
