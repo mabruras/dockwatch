@@ -36,7 +36,7 @@ const DaysOldLabel = styled.span`
 export default function DockContainerState({ container }) {
 
   const { state } = container;
-  console.log(container)
+
   if (!state) {
     return null;
   }

@@ -121,7 +121,8 @@ def remove_container(con_id):
     client = docker.from_env()
 
     try:
-        if removable_container(con_id):
+        con = client.containers.get(con_id)
+        if removable_container(con):
             print('Removing container with ID {}'.format(con_id))
             client.containers.get(con_id).remove(force=True)
         else:
