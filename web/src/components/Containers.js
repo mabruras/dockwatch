@@ -41,6 +41,7 @@ export default function Containers(props) {
       <Container>
         {containers.map(item => (
           <DockContainer 
+            imageId={imageId}
             container={item} 
             key={item.id} 
             handleRefetch={() => fetchData()} />
