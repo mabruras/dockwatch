@@ -4,8 +4,7 @@ An application for listing out your deployed containers on a specific node.
 ## Why DockWatch
 We do all have a full CI/CD setup, so what more do we need?
 
-Since we've might have enabled the possibility
-(_we do this in the **Example Setup** below_) to deploy code from
+Since we've might have enabled the possibility to deploy code from
 every branch in each of the repositories - it's necessary to keep
 track of what is running on all the nodes in each environment.
 
