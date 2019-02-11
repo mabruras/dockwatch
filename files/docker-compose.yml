@@ -3,32 +3,32 @@ version: '3'
 services:
 
   web:
-    image: mabruras/dock-watch-web:0.1
+    image: mabruras/dockwatch-web
     build:
-      context: web
+      context: ../web
     restart: unless-stopped
-    container_name: dock-watch-web
+    container_name: dockwatch-web
     labels:
     - "dockwatch.hidden=true"
 
     environment:
-    - "REACT_APP_API_URL=${DOCK_WATCH_API:-http://localhost:5000/api}"
+    - "REACT_APP_API_URL=${DOCKWATCH_API:-http://localhost:1609/api}"
     ports:
     - 3000:3000
 
   api:
-    image: mabruras/dock-watch-api:0.1
+    image: mabruras/dockwatch-api
     build:
-      context: api
+      context: ../api
     restart: unless-stopped
-    container_name: dock-watch-api
+    container_name: dockwatch-api
     labels:
-      - "dockwatch.hidden=true"
+    - "dockwatch.hidden=true"
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     ports:
-    - 5000:5000
+    - 1609:1609
 
   redis:
     image: redis
