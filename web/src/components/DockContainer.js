@@ -7,6 +7,7 @@ import { loading } from '../icons';
 import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
 import { Link } from 'react-router-dom';
+import ContainerImageLabel from './ContainerImageLabel';
 
 const DockContainerWrapper = styled.div`
   display: flex;
@@ -42,15 +43,10 @@ const ContainerName = styled.h2`
     font-size: 1.4rem;
   }
   `;
-const ImageNameWrapper = styled.h4`
-  margin: 0;
-  color: #555;
-`;
 
 const ContainerState = styled.div`
   display: flex;
   align-items: center;
-
 `;
 
 const ContainerTag = styled.span`
@@ -170,9 +166,7 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
       <ContainerState>
       <DockContainerState container={container} />
       </ContainerState>
-        <ImageNameWrapper>
-            {container.image.name}:{container.image.version}
-        </ImageNameWrapper>
+      <ContainerImageLabel container={container} />
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }
