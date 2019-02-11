@@ -140,6 +140,18 @@ def remove_container(con_id):
     return ok_response(dict())
 
 
+@app.route('/api/containers/<con_id>/logs', methods=['GET'])
+def get_container_logs(con_id):
+    def generate():
+        client = docker.from_env()
+
+        for row in client.containers.get(con_id).logs(stream=True, follow=True):
+            yield row.decode("utf-8")
+        client.close()
+
+    return Response(generate(), mimetype='text/plain')
+
+
 def err_response(err, code):
     return Response(
         response=json.dumps({'error': err}),
