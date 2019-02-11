@@ -203,4 +203,4 @@ def extract_container_info(container):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=os.environ.get('DW_PORT', 1609))

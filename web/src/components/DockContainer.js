@@ -135,7 +135,7 @@ export default function DockContainer({ container, handleRefetch }) {
 
   let containerHref = container.labels[
       Object.keys(container.labels).find(k => {
-        return k === `${process.env.REACT_APP_URL_LBL}`
+        return k === `${process.env.REACT_APP_URL_LBL}` || 'container.url'
       })
       ] || '#';
 

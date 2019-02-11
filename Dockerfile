@@ -30,5 +30,6 @@ RUN             yarn install \
                   && react-scripts build
 
 
+EXPOSE          1609
 WORKDIR         ${DW_HOME}
 CMD             [ "python3", "api/app.py" ]
