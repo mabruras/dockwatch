@@ -39,7 +39,7 @@ const ContainerId = styled.span`
 `;
 
 const DetailsSubTitle = styled.h3`
-    color: burlywood;
+    color: #dbdbdb;
     margin: 0.5rem 0;
     margin-top: 1rem;
 `;

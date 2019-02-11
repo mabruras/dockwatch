@@ -32,6 +32,12 @@ export default function useApi(opts) {
         }
       };
 
+      console.error({
+        selectedNodeContext: selectedNodeContext,
+        baseUrl: selectedNodeContext.data.baseUrl,
+        fullUrl: `${selectedNodeContext.data.baseUrl}/${opts.endpoint}`
+      })
+      
       const res = await fetch(
         `${selectedNodeContext.data.baseUrl}/${opts.endpoint}`,
         {
