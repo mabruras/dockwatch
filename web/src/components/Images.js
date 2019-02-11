@@ -134,6 +134,7 @@ export default function Images() {
     });
   }, []);
 
+  // eslint-disable-next-line
   const [busy, images, error, fetchData] = useApi({
     endpoint: "images",
     fetchOnMount: true,
