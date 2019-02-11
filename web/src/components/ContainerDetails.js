@@ -30,9 +30,18 @@ const DetailsTitle = styled.h2`
     color: #fff;
 `;
 
+const ImageName = styled.p`
+  margin: 0;
+  font-weight: bold;
+  color: ${props => props.color || "#fff"}
+`;
+
+const ImageVersion = styled.span`
+  color: #fff;
+`;
 
 const DetailsSubTitle = styled.h3`
-    color: #777;
+    color: burlywood;
     margin: 0.5rem 0;
 `;
 
@@ -87,19 +96,29 @@ export default function ContainerDetails (props) {
         >
           <Container>
               <DetailsTitle>
-                  Container Details
+                  Container details 
               </DetailsTitle>
+              <DetailsSubTitle>
+                 Original image
+              </DetailsSubTitle>
+              {container ? (
+                <ImageName color={determineColorForString(container.image.name)}>
+                  {container.image.name}:
+                  <ImageVersion>{container.image.version}</ImageVersion>
+                </ImageName>
+              ) : null}
+              <DetailsSubTitle>
+                  Container status
+              </DetailsSubTitle>
+              <DockContainerState container={container} />
               <DetailsSubTitle>
                   Labels {container ? `(${Object.keys(container.labels).length})` : ''}
               </DetailsSubTitle>
               <ContainerLabel container={container} />
-              <DetailsSubTitle>
-                  Status
-              </DetailsSubTitle>
-              <DockContainerState container={container} />
+             
             
               <DetailsTitle>
-                  Dock Log
+                  Dock Log <span role="img" aria-label="log">📚</span>
               </DetailsTitle>
             <LogWrapper>
               <LazyLog 
