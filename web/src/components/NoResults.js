@@ -42,7 +42,7 @@ const Shadow = styled.div`
   animation: ${scaleX} 2s ease-in-out infinite;
 `;
 
-const NO_CONTENT_EMOJIS = ["🤔", "🙈", "😭", "😴", "🎁"]
+const NO_CONTENT_EMOJIS = ["🤔", "🙈", "😭", "😴", "🎁", "🍑", "🍆"]
 
 export default function NoContentFound(props) {
   
