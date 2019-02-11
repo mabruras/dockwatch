@@ -47,9 +47,9 @@ export default function useApi(opts) {
 
       if(!ok) {
         if (typeof opts.onError === 'function') {
-          setBusy(false);
           opts.onError("An error occurred.");
         }
+        setBusy(false);
         return;
       }
 
