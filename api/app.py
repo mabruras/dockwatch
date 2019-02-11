@@ -83,7 +83,7 @@ def get_app_versions(img_name):
     try:
         result = [
             extract_container_info(container) for container in get_valid_containers(client)
-            if img_name in get_image_name(container.image)
+            if img_name == get_image_name(container.image, only_app=True)
         ]
     except Exception as e:
         print('Could not fetch containers for image {}'.format(img_name))
