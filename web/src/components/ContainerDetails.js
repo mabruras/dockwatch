@@ -12,6 +12,7 @@ import determineColorForString from '../utils/determineColorForString';
 import NoResults from './NoResults';
 import DockContainerState from './DockContainerState';
 import ContainerLabel from './ContainerLabels';
+import ContainerImageLabel from './ContainerImageLabel';
 
 Line.defaultProps.style = {
     color: 'green'
@@ -27,22 +28,24 @@ const LogWrapper = styled.div`
 `;
 
 const DetailsTitle = styled.h2`
-    color: #fff;
-`;
-
-const ImageName = styled.p`
-  margin: 0;
-  font-weight: bold;
-  color: ${props => props.color || "#fff"}
-`;
-
-const ImageVersion = styled.span`
   color: #fff;
+  margin: 0.5rem 0;
+`;
+
+const ContainerName = styled.p`
+  margin: 0;
+  color: orange;
+`;
+
+const ContainerId = styled.span`
+  color: #777;
+  font-style: italic;
 `;
 
 const DetailsSubTitle = styled.h3`
     color: burlywood;
     margin: 0.5rem 0;
+    margin-top: 1rem;
 `;
 
 
@@ -98,25 +101,26 @@ export default function ContainerDetails (props) {
               <DetailsTitle>
                   Container details 
               </DetailsTitle>
+               {container && (
+                 <>
+               <DetailsSubTitle>
+                 Container name
+               </DetailsSubTitle>
+                 <ContainerName>{container.name} <ContainerId>(id: {container.id})</ContainerId></ContainerName>
+                 </>
+               )} 
               <DetailsSubTitle>
                  Original image
               </DetailsSubTitle>
-              {container ? (
-                <ImageName color={determineColorForString(container.image.name)}>
-                  {container.image.name}:
-                  <ImageVersion>{container.image.version}</ImageVersion>
-                </ImageName>
-              ) : null}
+                <ContainerImageLabel container={container} />
               <DetailsSubTitle>
-                  Container status
+                  Container state
               </DetailsSubTitle>
               <DockContainerState container={container} />
               <DetailsSubTitle>
                   Labels {container ? `(${Object.keys(container.labels).length})` : ''}
               </DetailsSubTitle>
               <ContainerLabel container={container} />
-             
-            
               <DetailsTitle>
                   Dock Log <span role="img" aria-label="log">📚</span>
               </DetailsTitle>
@@ -128,7 +132,6 @@ export default function ContainerDetails (props) {
                   background: "#111",
                   outline: 0
                 }
-
               }
               />
             </LogWrapper>

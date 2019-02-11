@@ -5,6 +5,7 @@ import moment from 'moment';
 const ContainerCreatedAt = styled.span`
   color: #fff;
   margin-left: 0.5rem;
+  font-weight: normal;
 `;
 
 const StyledRunningStateInfo = styled.span`
@@ -58,11 +59,11 @@ export default function DockContainerState({ container }) {
 
   function determineDaysOld(daysSinceCreation) {
     if(daysSinceCreation === 0) {
-      return "lime";
+      return "cadetblue";
     }
 
     if(daysSinceCreation < 7) {
-      return "green";
+      return "mediumseagreen";
     }
 
     if (daysSinceCreation >= 7 && daysSinceCreation < 14) {
