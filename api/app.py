@@ -68,11 +68,7 @@ def get_applications():
     result = [images[v] for v in images]
 
     client.close()
-    return Response(
-        response=json.dumps(result),
-        mimetype='application/json',
-        status=200,
-    )
+    return ok_response(result)
 
 
 @app.route('/api/images/<img_name>/containers', methods=['GET'])
@@ -90,11 +86,7 @@ def get_app_versions(img_name):
         print(e)
 
     client.close()
-    return Response(
-        response=json.dumps(result),
-        mimetype='application/json',
-        status=200,
-    )
+    return ok_response(result)
 
 
 @app.route('/api/containers/<con_id>/restart', methods=['POST'])
@@ -103,24 +95,24 @@ def restart_container(con_id):
     client = docker.from_env()
 
     try:
-        print('Restarting container with ID {}'.format(con_id))
-        client.containers.get(con_id).restart()
+        con = client.containers.get(con_id)
+        if restartable_container(con):
+            print('Restarting container with ID {}'.format(con_id))
+            con.restart()
+        else:
+            err = 'Container ({}) not restartable'.format(con_id)
+            print(err)
+
+            client.close()
+            return err_response(err, 400)
     except docker.errors.APIError as e:
         print('Failed restarting container with ID {}: \n{}'.format(con_id, e))
         client.close()
-        return Response(
-            response=e,
-            mimetype='text/plain',
-            status=500,
-        )
+        return err_response(e, 500)
 
     print('Restart complete')
     client.close()
-    return Response(
-        response=json.dumps(dict()),
-        mimetype='application/json',
-        status=200,
-    )
+    return ok_response(dict())
 
 
 @app.route('/api/containers/<con_id>/delete', methods=['DELETE'])
@@ -129,21 +121,36 @@ def remove_container(con_id):
     client = docker.from_env()
 
     try:
-        print('Removing container with ID {}'.format(con_id))
-        client.containers.get(con_id).remove(force=True)
+        if removable_container(con_id):
+            print('Removing container with ID {}'.format(con_id))
+            client.containers.get(con_id).remove(force=True)
+        else:
+            err = 'Container ({}) not restartable'.format(con_id)
+            print(err)
+
+            client.close()
+            return err_response(err, 400)
     except docker.errors.APIError as e:
         print('Failed removing container with ID {}: \n{}'.format(con_id, e))
         client.close()
-        return Response(
-            response=e,
-            mimetype='text/plain',
-            status=500,
-        )
+        return err_response(e, 500)
 
     print('Removal complete')
     client.close()
+    return ok_response(dict())
+
+
+def err_response(err, code):
     return Response(
-        response=json.dumps(dict()),
+        response=json.dumps({'error': err}),
+        mimetype='application/json',
+        status=code,
+    )
+
+
+def ok_response(result):
+    return Response(
+        response=json.dumps(result),
         mimetype='application/json',
         status=200,
     )
@@ -158,6 +165,14 @@ def get_valid_containers(client):
 
 def hidden_container(con):
     return con.labels.get('dockwatch.hidden', 'false').lower() != 'false'
+
+
+def restartable_container(con):
+    return con.labels.get('dockwatch.restartable', 'false').lower() == 'true'
+
+
+def removable_container(con):
+    return con.labels.get('dockwatch.removable', 'false').lower() == 'true'
 
 
 def untagged_image(image):
