@@ -69,8 +69,8 @@ It is possible to deploy either of the components (API and Web) standalone,
 even though it's recommended to always be deployed as a complete system.
 
 
-## Deploy
-You can either deploy a single instance of the API, which is
+### Deploy
+You can deploy a single instance of the API, which is
 useful when planning to use a centralized DockWatch Web instance.
 ```bash
 docker build -t mabruras/dockwatch-api api
