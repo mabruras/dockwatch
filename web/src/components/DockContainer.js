@@ -6,6 +6,7 @@ import useApi from '../hooks/useApi';
 import { loading } from '../icons';
 import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
+import { Link } from 'react-router-dom';
 
 const DockContainerWrapper = styled.div`
   display: flex;
@@ -65,7 +66,8 @@ const ContainerOptions = styled.div`
   }
   `;
 
-const StyledActionButton = styled.button`
+const COMMON_ACTION_BUTTON_STYLES = `
+  text-decoration: none;
   outline: 0;
   padding: 0.5rem 1rem;
   background-color: transparent;
@@ -75,6 +77,7 @@ const StyledActionButton = styled.button`
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 0.8rem;
   margin: 0 0.5rem;
   transition: all 0.15s ease-in-out;
 
@@ -85,6 +88,15 @@ const StyledActionButton = styled.button`
   @media all and (max-width: 450px) {
     margin: 0.5rem;
   }
+`
+
+const StyledActionButton = styled.button`
+  ${COMMON_ACTION_BUTTON_STYLES}
+  `;
+
+const LogLink = styled(({ ...props }) => <Link {...props} />)`
+  color: lightskyblue;
+  ${COMMON_ACTION_BUTTON_STYLES}
 `;
 
 const Remove = styled(StyledActionButton)`
@@ -108,7 +120,7 @@ const Spinner = styled.span`
   }
 `;
 
-export default function DockContainer({ container, handleRefetch }) {
+export default function DockContainer({ imageId, container, handleRefetch }) {
   
   if (!container) {
     return null;
@@ -168,6 +180,7 @@ export default function DockContainer({ container, handleRefetch }) {
     <ContainerOptions>
       {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
       {isRemovable && <Remove onClick={() => removeContainer()}>REMOVE</Remove>}
+      <LogLink to={`/${imageId}/${container.id}`}>VIEW DETAILS</LogLink>
     </ContainerOptions>
     </DockContainerWrapper>
   );
