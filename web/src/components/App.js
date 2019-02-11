@@ -11,6 +11,8 @@ import { arrowBack } from '../icons';
 import { TitleContext } from '../context/AppTitleContext';
 import CreateNode from './CreateNode';
 import Nodes from './Nodes';
+import ContainerDetails from './ContainerDetails';
+
 
 const AppTitleWrapper = styled.nav`
   background: #111;
@@ -91,6 +93,7 @@ export default function App(props) {
         <Route path="/nodes" exact component={Nodes} />
         <Route path="/nodes/create" exact component={CreateNode} />
         <Route path="/:imageId" exact component={Containers} />
+        <Route path="/:imageId/:containerId" exact component={ContainerDetails} />
       </Switch>
     </>
   );

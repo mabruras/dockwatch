@@ -178,9 +178,9 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
       }
     </StyledObjectLink>
     <ContainerOptions>
-      <LogLink to={`/${imageId}/${container.id}`}>VIEW DETAILS</LogLink>
       {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
       {isRemovable && <Remove onClick={() => removeContainer()}>REMOVE</Remove>}
+      <LogLink to={`/${imageId}/${container.id}`}>VIEW DETAILS</LogLink>
     </ContainerOptions>
     </DockContainerWrapper>
   );
