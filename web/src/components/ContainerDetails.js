@@ -2,9 +2,8 @@ import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 import Container from '../styleguides/Container';
 import Flex from '../styleguides/Flex';
-import { LazyLog } from 'react-lazylog';
+import { LazyLog, ScrollFollow } from 'react-lazylog/es5';
 import { SelectedNodeContext } from '../context/SelectedNodeContext';
-import Line from 'react-lazylog/build/Line';
 import { TitleContext } from '../context/AppTitleContext';
 import Busy from './Busy';
 import useApi from '../hooks/useApi';
@@ -14,10 +13,6 @@ import DockContainerState from './DockContainerState';
 import ContainerLabel from './ContainerLabels';
 import ContainerImageLabel from './ContainerImageLabel';
 
-Line.defaultProps.style = {
-    color: 'green'
-  };
-
 const ContainerLogWrapper = styled.div`
   margin: 1rem;
 `;
@@ -25,6 +20,7 @@ const ContainerLogWrapper = styled.div`
 const LogWrapper = styled.div`
   width: 100%;
   height: 55vh;
+  margin: 0.5rem 0;
 `;
 
 const DetailsTitle = styled.h2`
@@ -34,7 +30,7 @@ const DetailsTitle = styled.h2`
 
 const ContainerName = styled.p`
   margin: 0;
-  color: orange;
+  color: ${props => props.color || "orange"};
 `;
 
 const ContainerId = styled.span`
@@ -47,7 +43,6 @@ const DetailsSubTitle = styled.h3`
     margin: 0.5rem 0;
     margin-top: 1rem;
 `;
-
 
 export default function ContainerDetails (props) {
   
@@ -106,7 +101,7 @@ export default function ContainerDetails (props) {
                <DetailsSubTitle>
                  Container name
                </DetailsSubTitle>
-                 <ContainerName>{container.name} <ContainerId>(id: {container.id})</ContainerId></ContainerName>
+                 <ContainerName color={determineColorForString(container.name)}>{container.name} <ContainerId>(id: {container.id})</ContainerId></ContainerName>
                  </>
                )} 
               <DetailsSubTitle>
@@ -125,15 +120,22 @@ export default function ContainerDetails (props) {
                   Dock Log <span role="img" aria-label="log">📚</span>
               </DetailsTitle>
             <LogWrapper>
-              <LazyLog 
-              url={`${selectedNodeContext.data.baseUrl}/containers/${containerId}/logs`} stream extraLines={5}
-              style={
+            {container && (
+
+              <ScrollFollow
+                startFollowing={true}
+                render={({ follow, onScroll }) => (
+                <LazyLog extraLines={5} url={`${selectedNodeContext.data.baseUrl}/containers/${container.id}/logs`} stream follow={follow} onScroll={onScroll} style={
                 {
-                  background: "#111",
-                  outline: 0
-                }
-              }
+                  outline: 0,
+                  color: "#fff",
+                  background: "#111"
+                } 
+              }/>
+              )}
               />
+            )}
+              
             </LogWrapper>
           </Container>
         </Flex>
