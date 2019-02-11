@@ -135,6 +135,8 @@ export default function DockContainer({ container, handleRefetch }) {
   });
 
   let containerHref = container.labels['container.url'] || '#';
+  let isRemovable = container.labels['dockwatch.removable'] && container.labels['dockwatch.removable'].toUpperCase() === "TRUE";
+  let isRestartable = container.labels['dockwatch.restartable'] && container.labels['dockwatch.restartable'].toUpperCase() === "TRUE";
 
   if(containerHref !== '#' && !isWebUri(containerHref)) {
     containerHref = "http://" + containerHref;
@@ -164,10 +166,9 @@ export default function DockContainer({ container, handleRefetch }) {
       }
     </StyledObjectLink>
     <ContainerOptions>
-      <Restart onClick={() => restartContainer()}>RESTART</Restart>
-      <Remove onClick={() => removeContainer()}>REMOVE</Remove>
+      {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
+      {isRemovable && <Remove onClick={() => removeContainer()}>REMOVE</Remove>}
     </ContainerOptions>
-    
     </DockContainerWrapper>
   );
 }
