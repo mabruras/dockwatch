@@ -56,8 +56,14 @@ const ImageItem = styled(Flex)`
     flex-basis: 100%;
   }
 
-  background-color: ${props => (props.color ? props.color : "#222")};
+  background-color: #222;
 `;
+
+const ChangeNodeImageItem =styled(ImageItem)`
+  background-color: #62469452;
+  padding: 2rem;
+`;
+
 const Versions = styled.div`
   display: flex;
 `;
@@ -151,14 +157,13 @@ export default function Images() {
 
       <Busy busy={busy || !selectedNodeContext.hasLoaded}>
         <ImagesGrid>
-          <ImageItem
+          <ChangeNodeImageItem
             child
             basis="32%"
             gutterBottom
             alignItems="center"
             justify="center"
             fullWidth
-            color={"#62469452"}
           >
             <StyledImageLink to={`/nodes`}>
               <ImageExtraName>
@@ -173,7 +178,7 @@ export default function Images() {
               </ImageExtraName>
               <StyledName color={"#fff"}>Change Node</StyledName>
             </StyledImageLink>
-          </ImageItem>
+          </ChangeNodeImageItem>
           {images.map(c => {
             return (
               <ImageItem
