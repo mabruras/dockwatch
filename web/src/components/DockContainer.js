@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
+import styled, { css } from 'styled-components';
 import determineColorForString from '../utils/determineColorForString';
 import DockContainerState from './DockContainerState';
 import useApi from '../hooks/useApi';
@@ -14,13 +14,18 @@ const DockContainerWrapper = styled.div`
   justify-content: space-between;
   padding: 1rem;
   border-bottom: 1px solid #624694;
-
   @media all and (max-width: 450px) {
     flex-direction: column;
   }
+
+  ${props => props.isRemoving && css`
+  border-bottom: 0;
+  background-color: #222;
+  `}
+
 `;
 
-const StyledObjectLink = styled.a`
+const StyledObjectLink = styled(({ ...props }) => <Link {...props} />)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -90,10 +95,15 @@ const StyledActionButton = styled.button`
   ${COMMON_ACTION_BUTTON_STYLES}
   `;
 
-const LogLink = styled(({ ...props }) => <Link {...props} />)`
+const SiteLink = styled.a`
   color: lightskyblue;
   ${COMMON_ACTION_BUTTON_STYLES}
 `;
+
+const Cancel = styled(StyledActionButton)`
+  color: #dbdbdb;
+`;
+
 
 const Remove = styled(StyledActionButton)`
   color: salmon;
@@ -116,11 +126,33 @@ const Spinner = styled.span`
   }
 `;
 
+const RemoveWarn = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  background: #222;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  `;
+
+const StyledWarnHeader = styled.h3`
+  color: salmon;
+  margin: 0;
+`;
+
+const StyledWarnText = styled.p`
+  color: salmon;
+  margin: 1rem;
+`;
+
 export default function DockContainer({ imageId, container, handleRefetch }) {
   
   if (!container) {
     return null;
   }
+
+  const [isRemoving, setIsRemoving] = useState(false);
 
   // eslint-disable-next-line
   const [restartingContainer, restartResponse, err1, restartContainer] = useApi({
@@ -151,8 +183,12 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
   }
 
   return (
-    <DockContainerWrapper>
-    <StyledObjectLink href={containerHref}>
+    <div>
+      
+   
+
+    <DockContainerWrapper isRemoving={isRemoving}>
+    <StyledObjectLink to={`/${imageId}/${container.id}`}>
     <ContainerNameWrapper>
     <ContainerTag color={determineColorForString(container.name)}>
           { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
@@ -171,11 +207,28 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }
     </StyledObjectLink>
-    <ContainerOptions>
-      {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
-      {isRemovable && <Remove onClick={() => removeContainer()}>REMOVE</Remove>}
-      <LogLink to={`/${imageId}/${container.id}`}>VIEW DETAILS</LogLink>
-    </ContainerOptions>
+    {
+      !isRemoving && (
+        <ContainerOptions>
+        {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
+        {isRemovable && <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>}
+        {containerHref !== '#' && <SiteLink href={containerHref}>VIEW SITE</SiteLink>}
+      </ContainerOptions>
+      )
+    }
     </DockContainerWrapper>
+    {
+      isRemoving && (
+        <RemoveWarn>
+          <StyledWarnHeader>Confirm remove</StyledWarnHeader>
+          <StyledWarnText>Warning: This action cannot be undone.</StyledWarnText>
+          <ContainerOptions>
+           <Cancel onClick={() => setIsRemoving(false)}>CANCEL</Cancel>
+           <Remove onClick={() => removeContainer()}>REMOVE</Remove>
+          </ContainerOptions>
+        </RemoveWarn>
+      )
+    }
+    </div>
   );
 }
