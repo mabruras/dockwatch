@@ -135,7 +135,6 @@ export default function ContainerDetails (props) {
               )}
               />
             )}
-              
             </LogWrapper>
           </Container>
         </Flex>
