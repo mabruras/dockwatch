@@ -1,6 +1,9 @@
 .idea
 *.iml
 
+web/node_modules
+web/package-lock.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+
+  web-install:
+    image: node:lts
+    command: "npm install"
+    container_name: dockwatch-web-install
+
+    user: 1000:1000
+    volumes:
+    - ../web:/usr/src/app
+    working_dir: /usr/src/app
+
+
+  web:
+    image: node:lts
+    restart: unless-stopped
+    container_name: dockwatch-web
+    command: "npm start"
+
+    environment:
+    - "REACT_APP_API_URL=http://localhost:1609/api"
+    volumes:
+    - ../web:/usr/src/app
+    working_dir: /usr/src/app
+    ports:
+    - 3000:3000
+
+  api:
+    image: python:3.7
+    restart: unless-stopped
+    container_name: dockwatch-api
+    command: "python app.py"
+
+    volumes:
+    - ../api:/usr/src/app
+    - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /usr/src/app
+    ports:
+    - 1609:1609
+
+  redis:
+    image: redis
+    restart: unless-stopped
+    container_name: dw_redis
+
+    ports:
+    - 6379:6379
