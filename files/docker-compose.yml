@@ -22,8 +22,10 @@ services:
       context: ../api
     restart: unless-stopped
     container_name: dockwatch-api
+    environment:
+    - "PYTHONUNBUFFERED=1"
     labels:
-    - "dockwatch.hidden=true"
+    - "dockwatch.hidden=false"
 
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock

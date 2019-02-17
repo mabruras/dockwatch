@@ -2,6 +2,7 @@
 import json
 import os
 
+import time
 import docker
 from flask import Flask, Response, send_from_directory
 from flask_cors import CORS, cross_origin
@@ -11,6 +12,10 @@ CORS(app, origins="*", allow_headers=[
     'Content-Type', 'Authorization', 'X-Requested-With',
     'Content-Length', 'Accept', 'Origin'
 ])
+
+# Added a default threshold to close Docker client, until
+# a more permanent solution is found (not prioritized atm)
+LOG_READ_THRESHOLD = os.environ.get('LOG_READ_THRESHOLD', 300)
 
 
 @app.after_request
@@ -160,12 +165,21 @@ def remove_container(con_id):
 def get_container_logs(con_id):
     def generate():
         client = docker.from_env()
-
-        for row in client.containers.get(con_id).logs(stream=True, follow=True):
+        started = time_now()
+        print('Opening log stream for container {}'.format(con_id))
+        for row in client.containers.get(con_id).logs(stream=True):
+            if (time_now() - started) > LOG_READ_THRESHOLD:
+                print('Log reading threshold reached')
+                break
             yield row.decode("utf-8")
+        print('Closing stream of container logs (id: {})'.format(con_id))
         client.close()
 
-    return Response(generate(), mimetype='text/plain')
+    return Response(generate(), mimetype='event/stream-text')
+
+
+def time_now():
+    return int(round(time.time() * 1000)) / 1000
 
 
 def err_response(err, code):

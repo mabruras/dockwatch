@@ -105,7 +105,14 @@ Make sure that your deployment includes the necessary values by modifying these.
 | DW_PORT | 8080 | What port DownWatch is running on (_default: 1609_) |
 | REACT_APP_API_URL | http://localhost:1609/api | URL for where to access the DockWatch API |
 | REACT_APP_URL_LBL | app.url | What label referring to the applications URL (_default: container.url_) |
+| LOG_READ_THRESHOLD | 120 | **Seconds** to hold each log stream open (_default: 300_) |
 
+**[!]** Be careful with `LOG_READ_THRESHOLD`.
+This value tells when to close a log stream, after accessing
+a detailed page for a container, where the log is streamed.
+Since closing the page will not close the open log stream server side,
+there is implemented a timeout for the stream.
+Hopefully this will be changed with a better solution down the road.
 
 ### Internal Labels
 Internal labels are those who DockWatch uses for execute extra,
