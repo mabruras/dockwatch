@@ -7,7 +7,7 @@ import docker
 from flask import Flask, Response, send_from_directory
 from flask_cors import CORS, cross_origin
 
-app = Flask(__name__, static_folder='../web/build/static')
+app = Flask(__name__, static_folder='../web/static')
 CORS(app, origins="*", allow_headers=[
     'Content-Type', 'Authorization', 'X-Requested-With',
     'Content-Length', 'Accept', 'Origin'
@@ -32,10 +32,10 @@ def react(path):
     print('Path: {}'.format(path))
     if path != "" and os.path.exists("react_app/build/{}".format(path)):
         print('Accessing path: {}'.format(path))
-        return send_from_directory('../web/build', path)
+        return send_from_directory('../web', path)
     else:
-        print('Accessing default: {}../web/build/index.html'.format(os.path.curdir))
-        return send_from_directory('../web/build', 'index.html')
+        print('Accessing default: {}../web/index.html'.format(os.path.curdir))
+        return send_from_directory('../web', 'index.html')
 
 
 @app.route('/api/images', methods=['GET'])
