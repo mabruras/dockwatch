@@ -1,18 +1,18 @@
-FROM            node:lts-alpine
+FROM            node:lts-alpine as node-build
 
+WORKDIR         /usr/src/app
+COPY            ./web /usr/src/app
+RUN             yarn install \
+                  && yarn --prod build \
+                  && npm install -g react-scripts \
+                  && react-scripts build
+
+FROM            python:3.7-alpine
 ENV             DW_HOME /opt/dockwatch
 
-
-#               Python
 WORKDIR         ${DW_HOME}/api
 COPY            ./api .
-
-RUN             apk update \
-                  && apk add \
-                    --no-cache \
-                    python3 \
-                  && python3 -m ensurepip \
-                  && rm -r /usr/lib/python*/ensurepip
+COPY            --from=node-build /usr/src/app/build ${DW_HOME}/web
 
 RUN             pip3 install \
                   flask-cors \
@@ -20,16 +20,7 @@ RUN             pip3 install \
                   Flask \
                 && rm -r /root/.cache
 
-
-#               Yarn/NPM
-WORKDIR         ${DW_HOME}/web
-COPY            ./web .
-RUN             yarn install \
-                  && yarn --prod build \
-                  && npm install -g react-scripts \
-                  && react-scripts build
-
-
 EXPOSE          1609
 WORKDIR         ${DW_HOME}
 CMD             [ "python3", "api/app.py" ]
+
