@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const DEFAULT_APP_TITLE = 'Dock Watch ⚓';
+const DEFAULT_APP_TITLE = 'DockWatch ⚓';
 const DEFAULT_APP_COLOR = '#624694';
 
 let TitleContext = React.createContext();
