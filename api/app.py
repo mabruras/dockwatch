@@ -8,6 +8,14 @@ from flask_cors import CORS, cross_origin
 from endpoints import docker_api as api
 from endpoints import static_web as web
 
+from tools import dw_connect as con
+
+DW_PORT = os.environ.get('DW_PORT', 1609)
+
+DW_MODE_MULTI = 'multi'
+DW_MODE_SINGLE = 'single'
+DW_MODE = os.environ.get('DW_MODE', DW_MODE_SINGLE)
+
 app = Flask(__name__, static_folder='../web/static')
 CORS(app, origins="*", allow_headers=[
     'Content-Type', 'Authorization', 'X-Requested-With',
@@ -94,5 +102,14 @@ def ok_response(result):
     )
 
 
+def configure():
+    if DW_MODE == DW_MODE_MULTI:
+        print('Initializing broadcast listener')
+        con.start_broadcast_listener()
+        print('Initializing first broadcast')
+        con.broadcast_ip()
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=os.environ.get('DW_PORT', 1609))
+    configure()
+    app.run(host='0.0.0.0', port=DW_PORT)
