@@ -2,12 +2,12 @@
 import os
 import threading
 
+from connectors import network as net, udp_connector as udp
 from tools import cipher
-
-from connectors import network as net, udp_connector as udp, tcp_connector as tcp, http_connector as http
 
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = f'{PROJECT_DIR}{os.sep}conf'
+IP_LIST_FILE = f'{CONFIG_DIR}{os.sep}ip_list.csv'
 
 SECRET = os.environ.get('DW_SECRET', '')
 
@@ -35,16 +35,21 @@ def update_known_ips(data):
 
 
 def get_known_ips():
-    file_path = f'{CONFIG_DIR}{os.sep}ip.json'
-    mode = 'r' if os.path.exists(file_path) else 'w'
-
-    with open(file_path, mode) as f:
+    verify_ip_list_file()
+    with open(IP_LIST_FILE, 'r') as f:
         output = f.readlines()
 
-    return [o.strip() for o in output]
+    return [o.split(';') for o in output]
+
+
+def verify_ip_list_file():
+    if not os.path.isfile(IP_LIST_FILE):
+        if not os.path.exists(CONFIG_DIR):
+            os.makedirs(CONFIG_DIR)
+        open(IP_LIST_FILE, 'a').close()
 
 
 def write_ips_to_file(ip_list):
-    file_path = f'{CONFIG_DIR}{os.sep}ip.json'
-    with open(file_path, 'w+') as f:
+    verify_ip_list_file()
+    with open(IP_LIST_FILE, 'w+') as f:
         f.writelines(ip_list)
