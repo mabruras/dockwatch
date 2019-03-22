@@ -9,39 +9,43 @@ BROADCAST_PORT = os.environ.get('DW_BROADCAST_PORT', 11609)
 BROADCAST_DELAY = os.environ.get('DW_BROADCAST_DELAY_MINUTES', 30)
 
 
-def broadcast_message(msg, broadcast_addr):
+def broadcast_message(msg, broadcast_addr, infinite=False):
     cs = socket.socket(AF_INET, SOCK_DGRAM)
-    print('Broadcasting message to {}:{}'.format(broadcast_addr, BROADCAST_PORT))
+    print(f'Broadcasting message to {broadcast_addr}:{BROADCAST_PORT}')
 
     cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
     try:
-        print('Transmitting {} bytes'.format(len(msg)))
+        print(f'Transmitting {len(msg)} bytes')
         cs.sendto(msg, (broadcast_addr, BROADCAST_PORT))
     except Exception as e:
         print('Could not send broadcast')
-        print(e)
+        raise e
     finally:
         cs.close()
 
-    time.sleep(BROADCAST_DELAY)
+    if not infinite:
+        return
+
+    time.sleep(int(BROADCAST_DELAY) * 60)
+    broadcast_message(msg, broadcast_addr, infinite)
 
 
 def broadcast_listener(broadcast_addr, callback):
-    cs = socket.socket(AF_INET, SOCK_DGRAM)
-    print('Starting broadcast listener: {}:{}'.format(broadcast_addr, BROADCAST_PORT))
+    while True:
+        cs = socket.socket(AF_INET, SOCK_DGRAM)
+        print(f'Starting broadcast listener: {broadcast_addr}:{BROADCAST_PORT}')
 
-    try:
-        cs.bind((broadcast_addr, BROADCAST_PORT))
-    except:
-        print('Failed binding ')
+        try:
+            cs.bind((broadcast_addr, BROADCAST_PORT))
+        except Exception as e:
+            print('Failed binding broadcast listener')
+            cs.close()
+            raise e
+
+        data = cs.recvfrom(1024)
+        print(f'Received broadcast of {len(data[0])} bytes from {data[1]}')
         cs.close()
-        raise
 
-    data = cs.recvfrom(1024)
-    print('Received broadcast of {} bytes'.format(len(data)))
-    cs.close()
-
-    callback(data)
-    broadcast_listener(broadcast_addr, callback)
+        callback(data)

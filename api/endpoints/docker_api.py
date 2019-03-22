@@ -36,7 +36,7 @@ def get_images(client):
             statuses = images[img_name]['status']
             statuses.update({con.status: statuses.get(con.status, 0) + 1})
         except Exception as e:
-            print('Could not include container: {}, when fetching image: {}'.format(con, img_name))
+            print(f'Could not include container: {con}, when fetching image: {img_name}')
             print(e)
 
     # Removes the image name as key in the dict,
@@ -57,7 +57,7 @@ def get_containers(client, image):
         return result, 200
 
     except Exception as e:
-        err = 'Could not fetch containers for image {}'.format(image)
+        err = f'Could not fetch containers for image {image}'
         print(err)
         print(e)
         return err, 500
@@ -67,7 +67,7 @@ def get_containers(client, image):
 def get_container_info(client, con_id):
     container = next((extract_container_info(c) for c in get_valid_containers(client) if c.id == con_id), None)
     if not container:
-        err = 'No container with id {} available'.format(con_id)
+        err = f'No container with id {con_id} available'
         print(err)
         return err, 400
 
@@ -79,19 +79,19 @@ def restart_container(client, con_id):
     try:
         con = client.containers.get(con_id)
         if restartable_container(con):
-            print('Restarting container with ID {}'.format(con_id))
+            print(f'Restarting container with ID {con_id}')
             con.restart()
 
             print('Restart complete')
             return dict(), 200
         else:
-            err = 'Container ({}) not restartable'.format(con_id)
+            err = f'Container ({con_id}) not restartable'
             print(err)
 
             return err, 400
 
     except docker.errors.APIError as e:
-        print('Failed restarting container with ID {}: \n{}'.format(con_id, e))
+        print(f'Failed restarting container with ID {con_id}: \n{e}')
         return e, 500
 
 
@@ -100,18 +100,18 @@ def remove_container(client, con_id):
     try:
         con = client.containers.get(con_id)
         if removable_container(con):
-            print('Removing container with ID {}'.format(con_id))
+            print(f'Removing container with ID {con_id}')
             client.containers.get(con_id).remove(force=True)
 
             print('Removal complete')
             return dict(), 200
         else:
-            err = 'Container ({}) not restartable'.format(con_id)
+            err = f'Container ({con_id}) not restartable'
             print(err)
 
             return err, 400
     except docker.errors.APIError as e:
-        print('Failed removing container with ID {}: \n{}'.format(con_id, e))
+        print(f'Failed removing container with ID {con_id}: \n{e}')
         return e, 500
 
 
@@ -119,14 +119,14 @@ def get_container_logs(con_id):
     @closeable_client
     def generate(client):
         started = time_now()
-        print('Opening log stream for container {}'.format(con_id))
+        print(f'Opening log stream for container {con_id}')
 
         for row in client.containers.get(con_id).logs(stream=True):
             if (time_now() - started) > LOG_READ_THRESHOLD:
                 print('Log reading threshold reached')
                 break
             yield row.decode("utf-8")
-        print('Closing stream of container logs (id: {})'.format(con_id))
+        print(f'Closing stream of container logs (id: {con_id})')
 
     return generate
 
