@@ -3,6 +3,10 @@ import os
 import time
 
 import docker
+from flask import request
+
+from connectors import network as net
+from tools import dw_connect as con
 
 # Added a default threshold to close Docker client, until
 # a more permanent solution is found (not prioritized atm)
@@ -20,7 +24,30 @@ def closeable_client(func):
     return inner
 
 
+def multi_forward(func):
+    def inner(*args, **kwargs):
+        data = {}
+        current_ip = net.get_ip_addr()
+        if not request.headers.get('X-Forwarded-For', None):
+            # Forward if request is not already forwarded
+            print('Request does not contain X-Forwarded-For, forwarding request')
+            forward_ips = con.get_ips_from_all_instances()
+            print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
+            con.forward_request(forward_ips, data)
+            print(f'Completed forwarding requests to external instances')
+
+        print(f'Executing request on current instance')
+        res, code = func(*args, **kwargs)
+        print(f'Result from current instance ({code}): {res}')
+        data.update({current_ip: res})
+
+        return data, code
+
+    return inner
+
+
 @closeable_client
+@multi_forward
 def get_images(client):
     images = dict()
 
@@ -48,6 +75,7 @@ def get_images(client):
 
 
 @closeable_client
+@multi_forward
 def get_containers(client, image):
     try:
         result = [
@@ -64,6 +92,7 @@ def get_containers(client, image):
 
 
 @closeable_client
+@multi_forward
 def get_container_info(client, con_id):
     container = next((extract_container_info(c) for c in get_valid_containers(client) if c.id == con_id), None)
     if not container:
@@ -75,6 +104,7 @@ def get_container_info(client, con_id):
 
 
 @closeable_client
+@multi_forward
 def restart_container(client, con_id):
     try:
         con = client.containers.get(con_id)
@@ -96,6 +126,7 @@ def restart_container(client, con_id):
 
 
 @closeable_client
+@multi_forward
 def remove_container(client, con_id):
     try:
         con = client.containers.get(con_id)
@@ -115,6 +146,7 @@ def remove_container(client, con_id):
         return e, 500
 
 
+@multi_forward
 def get_container_logs(con_id):
     @closeable_client
     def generate(client):

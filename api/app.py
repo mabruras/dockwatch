@@ -7,7 +7,6 @@ from flask_cors import CORS, cross_origin
 
 from endpoints import docker_api as api
 from endpoints import static_web as web
-
 from tools import dw_connect as con
 
 DW_PORT = os.environ.get('DW_PORT', 1609)
@@ -35,6 +34,15 @@ def after_request(response):
 @app.route('/<path:path>')
 def react(path):
     return web.get_static_files(path)
+
+
+@app.route('/api/ips', methods=['GET'])
+def get_known_ips():
+    ip_list = {
+        'ips': list(con.get_known_ips())
+    }
+
+    return response((ip_list, 200))
 
 
 @app.route('/api/images', methods=['GET'])

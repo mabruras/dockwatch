@@ -28,7 +28,9 @@ def broadcast_message(msg, broadcast_addr, infinite=False):
     if not infinite:
         return
 
-    time.sleep(int(BROADCAST_DELAY) * 60)
+    for i in range(int(BROADCAST_DELAY) * 60):
+        time.sleep(1)
+
     broadcast_message(msg, broadcast_addr, infinite)
 
 
