@@ -41,7 +41,7 @@ def update_known_ips(data):
 def get_known_ips():
     verify_ip_list_file()
     with open(IP_LIST_FILE, 'r') as f:
-        output = f.readlines()
+        output = f.read().splitlines()
 
     return {net.get_ip_addr()}.union({o for o in output})
 
