@@ -22,6 +22,6 @@ def get_ip_addr():
 
 
 def get_broadcast_addr():
-    masked_ip = '{}/{}'.format(get_ip_addr(), NET_MASK)
+    masked_ip = f'{get_ip_addr()}/{NET_MASK}'
 
     return str(ipaddress.IPv4Network(masked_ip, False).broadcast_address)
