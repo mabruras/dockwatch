@@ -36,7 +36,7 @@ def update_known_ips(data):
     ip_list = cipher.decrypt_message(msg, SECRET)
 
     # Merge senders IP list with current instance IP list
-    ip_list = {ip_list}.union(get_known_ips())
+    ip_list = {ip for ip in ip_list.split(',') + list(get_known_ips())}
 
     write_ips_to_file(ip_list)
 
@@ -64,15 +64,14 @@ def verify_ip_list_file():
 
 
 def get_ips_from_all_instances():
-    return set.union({
-        *[
+    return {
+        item for sublist in [
             # TODO: Remove hardcoded port - maybe include in ip.list file?
             requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
-                # Exclude current instance IP
                 i for i in get_known_ips() if i != net.get_ip_addr()
             ]
-        ]
-    })
+        ] for item in sublist
+    }
 
 
 def forward_request(forward_ips, result):
