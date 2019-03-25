@@ -28,13 +28,21 @@ def multi_forward(func):
     def inner(*args, **kwargs):
         data = {}
         current_ip = net.get_ip_addr()
-        if not request.headers.get('X-Forwarded-For', None):
-            # Forward if request is not already forwarded
-            print('Request does not contain X-Forwarded-For, forwarding request')
-            forward_ips = con.get_ips_from_all_instances()
-            print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
-            con.forward_request(forward_ips, data)
-            print(f'Completed forwarding requests to external instances')
+
+        req_is_forwarded = request.headers.get('X-Forwarded-For', None)
+        if req_is_forwarded:
+            # Request should not be forwarded further
+            # Only run function on current instance
+            res, code = func(*args, **kwargs)
+
+            return res, code
+
+        # Forward if request is not already forwarded
+        print('Request does not contain X-Forwarded-For, forwarding request')
+        forward_ips = con.get_ips_from_all_instances()
+        print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
+        con.forward_request(forward_ips, data)
+        print(f'Completed forwarding requests to external instances')
 
         print(f'Executing request on current instance')
         res, code = func(*args, **kwargs)

@@ -77,18 +77,18 @@ def get_ips_from_all_instances():
 def forward_request(forward_ips, result):
     thread_pool = (
         threading.Thread(target=forward, args=[
-            f'{ip}', f'{request.path}', request.method, result
-        ]) for ip in forward_ips
+            f'{ip}', f'{request.path}', request.method, request.remote_addr, result
+        ]) for ip in forward_ips if ip != net.get_ip_addr()
     )
 
     [t.start() for t in thread_pool]
     [t.join() for t in thread_pool]
 
 
-def forward(host, path, method, result_dict):
+def forward(host, path, method, req_ip, result_dict):
     # TODO: Remove hardcoded port - maybe include in ip.list file?
-    url = f'http://{host}{path}:1609'
-    headers = {'X-Forwarded-For': request.remote_addr}
+    url = f'http://{host}:1609{path}'
+    headers = {'X-Forwarded-For': req_ip}
 
     print(f'# # # #  FORWARDING TO: {url}')
 
