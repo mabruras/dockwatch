@@ -45,12 +45,11 @@ def multi_forward(func):
         print(f'Completed forwarding requests to external instances')
 
         print(f'Executing request on current instance')
-        res, code = func(*args, **kwargs)
-        print(f'Result from current instance ({code}): {res}')
+        res, _ = func(*args, **kwargs)
+        print(f'Result from current instance ({_}): {res}')
         data.update({current_ip: res})
 
-        return data, code
-
+        return data, 200
     return inner
 
 

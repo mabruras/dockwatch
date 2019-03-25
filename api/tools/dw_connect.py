@@ -93,7 +93,7 @@ def forward(host, path, method, req_ip, result_dict):
     print(f'# # # #  FORWARDING TO: {url}')
 
     res = requests.request(method, url, headers=headers)
-    if 200 >= res.status_code < 300:
+    if 200 <= res.status_code < 300:
         result_dict.update({host: res.json()})
     else:
         result_dict.update({
