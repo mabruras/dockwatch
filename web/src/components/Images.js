@@ -141,11 +141,12 @@ export default function Images() {
   }, []);
 
   // eslint-disable-next-line
-  const [busy, images, error, fetchData] = useApi({
+  const [busy, nodes, error, fetchData] = useApi({
     endpoint: "images",
     fetchOnMount: true,
     initialData: []
   });
+  const images = Object.keys(nodes).map(k => nodes[k]).flat();
 
   return (
     <Container gutterTop>

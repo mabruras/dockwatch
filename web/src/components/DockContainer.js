@@ -156,7 +156,7 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
 
   // eslint-disable-next-line
   const [restartingContainer, restartResponse, err1, restartContainer] = useApi({
-    endpoint: `containers/${container.id}/restart`,
+    endpoint: `containers/${container.name}/restart`,
     method: "POST",
     successDelay: 2000,
     onSuccess: () => {
@@ -166,7 +166,7 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
 
    // eslint-disable-next-line
   const [removingContainer, removeResponse, err2, removeContainer] = useApi({
-    endpoint: `containers/${container.id}/delete`,
+    endpoint: `containers/${container.name}/delete`,
     method: "DELETE",
     successDelay: 2000,
     onSuccess: () => {
@@ -188,7 +188,7 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
    
 
     <DockContainerWrapper isRemoving={isRemoving}>
-    <StyledObjectLink to={`/${imageId}/${container.id}`}>
+    <StyledObjectLink to={`/${imageId}/${container.name}`}>
     <ContainerNameWrapper>
     <ContainerTag color={determineColorForString(container.name)}>
           { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
