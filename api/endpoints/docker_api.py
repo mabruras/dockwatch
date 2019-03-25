@@ -26,7 +26,7 @@ def closeable_client(func):
 
 def multi_forward(func):
     def inner(*args, **kwargs):
-        data = {}
+        data = []
         current_ip = net.get_ip_addr()
 
         req_is_forwarded = request.headers.get('X-Forwarded-For', None)
@@ -45,9 +45,18 @@ def multi_forward(func):
         print(f'Completed forwarding requests to external instances')
 
         print(f'Executing request on current instance')
-        res, _ = func(*args, **kwargs)
-        print(f'Result from current instance ({_}): {res}')
-        data.update({current_ip: res})
+        res, code = func(*args, **kwargs)
+        print(f'Result from current instance ({code}): {res}')
+        if 200 <= code < 300:
+            data.append({
+                'ip': current_ip,
+                'data': res
+            })
+        else:
+            data.append({
+                'ip': current_ip,
+                'error': res
+            })
 
         return data, 200
     return inner

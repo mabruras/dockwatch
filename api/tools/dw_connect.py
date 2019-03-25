@@ -85,7 +85,7 @@ def forward_request(forward_ips, result):
     [t.join() for t in thread_pool]
 
 
-def forward(host, path, method, req_ip, result_dict):
+def forward(host, path, method, req_ip, result_list):
     # TODO: Remove hardcoded port - maybe include in ip.list file?
     url = f'http://{host}:1609{path}'
     headers = {'X-Forwarded-For': req_ip}
@@ -94,8 +94,12 @@ def forward(host, path, method, req_ip, result_dict):
 
     res = requests.request(method, url, headers=headers)
     if 200 <= res.status_code < 300:
-        result_dict.update({host: res.json()})
+        result_list.append({
+            'ip': host,
+            'data': res.json()
+        })
     else:
-        result_dict.update({
-            host: {'error': res.json()}
+        result_list.append({
+            'ip': host,
+            'error': res.json()
         })
