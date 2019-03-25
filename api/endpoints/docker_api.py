@@ -105,7 +105,7 @@ def get_container_info(client, con_name):
     if not container:
         err = f'No container with name {con_name} available'
         print(err)
-        return err, 400
+        return {'error': err}, 400
 
     return container, 200
 
@@ -125,11 +125,11 @@ def restart_container(client, con_name):
             err = f'Container ({con_name}) not restartable'
             print(err)
 
-            return err, 400
+            return {'error': err}, 400
 
-    except docker.errors.APIError as e:
-        print(f'Failed restarting container with name {con_name}: \n{e}')
-        return e, 500
+    except docker.errors.APIError as err:
+        print(f'Failed restarting container with name {con_name}: \n{err}')
+        return {'error': err}, 500
 
 
 @closeable_client
@@ -147,10 +147,10 @@ def remove_container(client, con_name):
             err = f'Container ({con_name}) not restartable'
             print(err)
 
-            return err, 400
-    except docker.errors.APIError as e:
-        print(f'Failed removing container with name {con_name}: \n{e}')
-        return e, 500
+            return {'error': err}, 400
+    except docker.errors.APIError as err:
+        print(f'Failed removing container with name {con_name}: \n{err}')
+        return {'error': err}, 500
 
 
 @multi_forward
