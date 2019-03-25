@@ -96,7 +96,7 @@ def response(result):
 
 def err_response(err, code):
     return Response(
-        response=json.dumps({'error': err}),
+        response=json.dumps(err),
         mimetype='application/json',
         status=code,
     )
