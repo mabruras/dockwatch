@@ -9,8 +9,6 @@ import history from '../utils/history';
 import goBack from '../utils/goBack';
 import { arrowBack } from '../icons';
 import { TitleContext } from '../context/AppTitleContext';
-import CreateNode from './CreateNode';
-import Nodes from './Nodes';
 import ContainerDetails from './ContainerDetails';
 
 
@@ -90,10 +88,8 @@ export default function App(props) {
       </Flex>
       <Switch>
         <Route path="/" exact component={Images} />
-        <Route path="/nodes" exact component={Nodes} />
-        <Route path="/nodes/create" exact component={CreateNode} />
         <Route path="/:imageId" exact component={Containers} />
-        <Route path="/:imageId/:containerId" exact component={ContainerDetails} />
+        <Route path="/:imageId/:containerName" exact component={ContainerDetails} />
       </Switch>
     </>
   );

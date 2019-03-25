@@ -51,12 +51,12 @@ export default function ContainerDetails (props) {
 
   const {
     match: {
-      params: { containerId }
+      params: { containerName }
     }
   } = props;
 
   const [fetchingContainer, container] = useApi({
-    endpoint: `containers/${containerId}`,
+    endpoint: `containers/${containerName}`,
     initialData: null,
     fetchOnMount: true,
     onSuccess: container => {
@@ -101,7 +101,7 @@ export default function ContainerDetails (props) {
                <DetailsSubTitle>
                  Container name
                </DetailsSubTitle>
-                 <ContainerName color={determineColorForString(container.name)}>{container.name} <ContainerId>(id: {container.name})</ContainerId></ContainerName>
+                 <ContainerName color={determineColorForString(container.name)}><containerName>{container.name}</containerName></ContainerName>
                  </>
                )} 
               <DetailsSubTitle>
