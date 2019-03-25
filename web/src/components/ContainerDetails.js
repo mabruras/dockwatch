@@ -101,7 +101,7 @@ export default function ContainerDetails (props) {
                <DetailsSubTitle>
                  Container name
                </DetailsSubTitle>
-                 <ContainerName color={determineColorForString(container.name)}>{container.name} <ContainerId>(id: {container.id})</ContainerId></ContainerName>
+                 <ContainerName color={determineColorForString(container.name)}>{container.name} <ContainerId>(id: {container.name})</ContainerId></ContainerName>
                  </>
                )} 
               <DetailsSubTitle>
@@ -125,7 +125,7 @@ export default function ContainerDetails (props) {
               <ScrollFollow
                 startFollowing={true}
                 render={({ follow, onScroll }) => (
-                <LazyLog extraLines={5} url={`${selectedNodeContext.data.baseUrl}/containers/${container.id}/logs`} stream follow={follow} onScroll={onScroll} style={
+                <LazyLog extraLines={5} url={`${selectedNodeContext.data.baseUrl}/containers/${container.name}/logs`} stream follow={follow} onScroll={onScroll} style={
                 {
                   outline: 0,
                   color: "#fff",

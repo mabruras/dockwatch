@@ -28,11 +28,12 @@ export default function Containers(props) {
   }, []);
 
   // eslint-disable-next-line
-  const [fetchingContainers, containers, error, fetchData] = useApi({
+  const [fetchingContainers, nodes, error, fetchData] = useApi({
     endpoint: `images/${imageId}/containers`,
     fetchOnMount: true,
     initialData: []
   });
+  const containers = Object.keys(nodes).map(k => nodes[k]).flat();
 
   if (!imageId) return <NoContentFound />;
 
