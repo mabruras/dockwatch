@@ -74,20 +74,20 @@ def verify_ip_list_file():
 def get_ips_from_all_instances():
     return {
         item for sublist in [
-        # TODO: Remove hardcoded port - maybe include in ip.list file?
-        requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
-            i for i in get_known_ips() if i != net.get_ip_addr()
-        ]
-    ] for item in sublist
+            # TODO: Remove hardcoded port - maybe include in ip.list file?
+            requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
+                i for i in get_known_ips() if i != net.get_ip_addr()
+            ]
+        ] for item in sublist
     }
 
 
 def forward_request(forward_ips, result):
-    thread_pool = (
+    thread_pool = [
         threading.Thread(target=forward, args=[
             f'{ip}', f'{request.path}', request.method, request.remote_addr, result
         ]) for ip in forward_ips if ip != net.get_ip_addr()
-    )
+    ]
 
     [t.start() for t in thread_pool]
     [t.join() for t in thread_pool]
@@ -97,10 +97,10 @@ def forward(host, path, method, req_ip, result_list):
     # TODO: Remove hardcoded port - maybe include in ip.list file?
     url = f'http://{host}:1609{path}'
     headers = {'X-Forwarded-For': req_ip}
-
-    print(f'# # # #  FORWARDING TO: {url}')
+    print(f'Forwarding request on behalf of {req_ip}, to {url}')
 
     res = requests.request(method, url, headers=headers)
+    print(f'Forwarding completed with data response: {res.json()}')
     if 200 <= res.status_code < 300:
         result_list.append({
             'ip': host,
