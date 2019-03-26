@@ -26,39 +26,58 @@ def closeable_client(func):
 
 def multi_forward(func):
     def inner(*args, **kwargs):
-        data = []
+        node_responses = []
         current_ip = net.get_ip_addr()
 
         req_is_forwarded = request.headers.get('X-Forwarded-For', None)
         if req_is_forwarded:
-            # Request should not be forwarded further
             # Only run function on current instance
             res, code = func(*args, **kwargs)
+            print(f'Instance received a forwarded request, and resulted in ({code}): {res}')
 
             return res, code
 
         # Forward if request is not already forwarded
-        print('Request does not contain X-Forwarded-For, forwarding request')
+        print('Instance was entry point of request, forwarding request')
         forward_ips = con.get_ips_from_all_instances()
         print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
-        con.forward_request(forward_ips, data)
-        print(f'Completed forwarding requests to external instances')
+        con.forward_request(forward_ips, node_responses)
+        print(f'Result from external instances: {node_responses}')
 
         print(f'Executing request on current instance')
         res, code = func(*args, **kwargs)
         print(f'Result from current instance ({code}): {res}')
+
         if 200 <= code < 300:
-            data.append({
+            node_responses.append({
                 'ip': current_ip,
                 'data': res
             })
         else:
-            data.append({
+            node_responses.append({
                 'ip': current_ip,
                 'error': res
             })
 
-        return data, 200
+        complete = []
+        failed_nodes = []
+        for n in node_responses:
+            ip = n.get('ip')
+
+            if n.get('error'):
+                failed_nodes.append(n)
+                continue
+
+            for d in n.get('data'):
+                d['ip'] = ip
+                complete.append(d)
+
+        return {
+                   'data': complete,
+                   'errors': failed_nodes
+               }, 200
+        # return node_responses, 200
+
     return inner
 
 
