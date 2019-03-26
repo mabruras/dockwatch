@@ -21,14 +21,22 @@ def broadcast_ip():
     broadcast_addr = net.get_broadcast_addr()
 
     # Start broadcasting known IPs to other instances
-    threading.Thread(target=udp.broadcast_message, args=[out, broadcast_addr, True]).start()
+    threading.Thread(
+        name='Message Broadcaster',
+        target=udp.broadcast_message,
+        args=[out, broadcast_addr, True]
+    ).start()
 
 
 def start_broadcast_listener():
     broadcast_addr = net.get_broadcast_addr()
 
     # Start a listener for broadcasts, in a background thread.
-    threading.Thread(target=udp.broadcast_listener, args=[broadcast_addr, update_known_ips]).start()
+    threading.Thread(
+        name='Broadcast Listener',
+        target=udp.broadcast_listener,
+        args=[broadcast_addr, update_known_ips]
+    ).start()
 
 
 def update_known_ips(data):
@@ -66,11 +74,11 @@ def verify_ip_list_file():
 def get_ips_from_all_instances():
     return {
         item for sublist in [
-            # TODO: Remove hardcoded port - maybe include in ip.list file?
-            requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
-                i for i in get_known_ips() if i != net.get_ip_addr()
-            ]
-        ] for item in sublist
+        # TODO: Remove hardcoded port - maybe include in ip.list file?
+        requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
+            i for i in get_known_ips() if i != net.get_ip_addr()
+        ]
+    ] for item in sublist
     }
 
 
