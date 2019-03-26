@@ -10,28 +10,27 @@ BROADCAST_DELAY = os.environ.get('DW_BROADCAST_DELAY_MINUTES', 30)
 
 
 def broadcast_message(msg, broadcast_addr, infinite=False):
-    cs = socket.socket(AF_INET, SOCK_DGRAM)
-    print(f'Broadcasting message to {broadcast_addr}:{BROADCAST_PORT}')
+    while True:
+        cs = socket.socket(AF_INET, SOCK_DGRAM)
+        print(f'Broadcasting message to {broadcast_addr}:{BROADCAST_PORT}')
 
-    cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-    try:
-        print(f'Transmitting {len(msg)} bytes')
-        cs.sendto(msg, (broadcast_addr, BROADCAST_PORT))
-    except Exception as e:
-        print('Could not send broadcast')
-        raise e
-    finally:
-        cs.close()
+        try:
+            print(f'Transmitting {len(msg)} bytes')
+            cs.sendto(msg, (broadcast_addr, BROADCAST_PORT))
+        except Exception as e:
+            print('Could not send broadcast')
+            raise e
+        finally:
+            cs.close()
 
-    if not infinite:
-        return
+        if not infinite:
+            break
 
-    for i in range(int(BROADCAST_DELAY) * 60):
-        time.sleep(1)
-
-    broadcast_message(msg, broadcast_addr, infinite)
+        for i in range(int(BROADCAST_DELAY) * 60):
+            time.sleep(1)
 
 
 def broadcast_listener(broadcast_addr, callback):
