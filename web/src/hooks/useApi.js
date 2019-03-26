@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
-import { SelectedNodeContext } from '../context/SelectedNodeContext';
+import { useState, useEffect } from 'react';
 
 /**
  * Custom hook for API-calls
@@ -20,7 +19,6 @@ export default function useApi(opts) {
   const [busy, setBusy] = useState(false);
   const [data, setData] = useState(opts.initialData);
   const [error, setError] = useState(null);
-  const selectedNodeContext = useContext(SelectedNodeContext);
 
   async function fetchData() {
     try {
@@ -31,15 +29,9 @@ export default function useApi(opts) {
           'Content-Type': 'application/json'
         }
       };
-
-      console.error({
-        selectedNodeContext: selectedNodeContext,
-        baseUrl: selectedNodeContext.data.baseUrl,
-        fullUrl: `${selectedNodeContext.data.baseUrl}/${opts.endpoint}`
-      })
       
       const res = await fetch(
-        `${selectedNodeContext.data.baseUrl}/${opts.endpoint}`,
+        `/${opts.endpoint}`,
         {
           ...headers,
           method: opts.method || 'GET',
