@@ -7,7 +7,6 @@ import determineColorForString from "../utils/determineColorForString";
 import { TitleContext } from "../context/AppTitleContext";
 import useApi from "../hooks/useApi";
 import Busy from "./Busy";
-import { SelectedNodeContext } from "../context/SelectedNodeContext";
 import { loading } from "../icons";
 import { spin } from "../utils/animations";
 
@@ -127,7 +126,6 @@ const RefreshNodeWrapper = styled.div`
 
 export default function Images() {
   const { dispatch } = useContext(TitleContext);
-  const selectedNodeContext = useContext(SelectedNodeContext);
 
   useEffect(() => {
     dispatch({
@@ -151,7 +149,7 @@ export default function Images() {
         </RefreshNode>
       </RefreshNodeWrapper>
 
-      <Busy busy={busy || !selectedNodeContext.hasLoaded}>
+      <Busy busy={busy}>
         <ImagesGrid>
           {images.map(c => {
             return (

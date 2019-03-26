@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import Container from '../styleguides/Container';
 import Flex from '../styleguides/Flex';
 import { LazyLog, ScrollFollow } from 'react-lazylog/es5';
-import { SelectedNodeContext } from '../context/SelectedNodeContext';
 import { TitleContext } from '../context/AppTitleContext';
 import Busy from './Busy';
 import useApi from '../hooks/useApi';
@@ -31,11 +30,6 @@ const DetailsTitle = styled.h2`
 const ContainerName = styled.p`
   margin: 0;
   color: ${props => props.color || "orange"};
-`;
-
-const ContainerId = styled.span`
-  color: #777;
-  font-style: italic;
 `;
 
 const DetailsSubTitle = styled.h3`
@@ -73,9 +67,6 @@ export default function ContainerDetails (props) {
       setHasLoaded(true)
     }
   });
-
-  const selectedNodeContext = useContext(SelectedNodeContext);
-
 
   if(!container && !fetchingContainer && hasLoaded) {
     return <NoResults />
@@ -125,7 +116,7 @@ export default function ContainerDetails (props) {
               <ScrollFollow
                 startFollowing={true}
                 render={({ follow, onScroll }) => (
-                <LazyLog extraLines={5} url={`${selectedNodeContext.data.baseUrl}/containers/${container.name}/logs`} stream follow={follow} onScroll={onScroll} style={
+                <LazyLog extraLines={5} url={`/containers/${container.name}/logs`} stream follow={follow} onScroll={onScroll} style={
                 {
                   outline: 0,
                   color: "#fff",
