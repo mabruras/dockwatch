@@ -3,10 +3,8 @@ import os
 import time
 
 import docker
-from flask import request
 
-from connectors import network as net
-from tools import dw_connect as con
+from tools import api_forwarder as af
 
 # Added a default threshold to close Docker client, until
 # a more permanent solution is found (not prioritized atm)
@@ -24,65 +22,8 @@ def closeable_client(func):
     return inner
 
 
-def multi_forward(func):
-    def inner(*args, **kwargs):
-        node_responses = []
-        current_ip = net.get_ip_addr()
-
-        req_is_forwarded = request.headers.get('X-Forwarded-For', None)
-        if req_is_forwarded:
-            # Only run function on current instance
-            res, code = func(*args, **kwargs)
-            print(f'Instance received a forwarded request, and resulted in ({code}): {res}')
-
-            return res, code
-
-        # Forward if request is not already forwarded
-        print('Instance was entry point of request, forwarding request')
-        forward_ips = con.get_ips_from_all_instances()
-        print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
-        con.forward_request(forward_ips, node_responses)
-        print(f'Result from external instances: {node_responses}')
-
-        print(f'Executing request on current instance')
-        res, code = func(*args, **kwargs)
-        print(f'Result from current instance ({code}): {res}')
-
-        if 200 <= code < 300:
-            node_responses.append({
-                'ip': current_ip,
-                'data': res
-            })
-        else:
-            node_responses.append({
-                'ip': current_ip,
-                'error': res
-            })
-
-        complete = []
-        failed_nodes = []
-        for n in node_responses:
-            ip = n.get('ip')
-
-            if n.get('error'):
-                failed_nodes.append(n)
-                continue
-
-            for d in n.get('data'):
-                d['ip'] = ip
-                complete.append(d)
-
-        return {
-                   'data': complete,
-                   'errors': failed_nodes
-               }, 200
-        # return node_responses, 200
-
-    return inner
-
-
 @closeable_client
-@multi_forward
+@af.forward
 def get_images(client):
     images = dict()
 
@@ -110,7 +51,7 @@ def get_images(client):
 
 
 @closeable_client
-@multi_forward
+@af.forward
 def get_containers(client, image):
     try:
         result = [
@@ -127,7 +68,7 @@ def get_containers(client, image):
 
 
 @closeable_client
-@multi_forward
+@af.forward
 def get_container_info(client, con_name):
     container = next((extract_container_info(c) for c in get_valid_containers(client) if c.name == con_name), None)
     if not container:
@@ -139,7 +80,7 @@ def get_container_info(client, con_name):
 
 
 @closeable_client
-@multi_forward
+@af.forward
 def restart_container(client, con_name):
     try:
         con = client.containers.get(con_name)
@@ -161,7 +102,7 @@ def restart_container(client, con_name):
 
 
 @closeable_client
-@multi_forward
+@af.forward
 def remove_container(client, con_name):
     try:
         con = client.containers.get(con_name)
@@ -181,7 +122,7 @@ def remove_container(client, con_name):
         return {'error': err}, 500
 
 
-@multi_forward
+@af.forward
 def get_container_logs(con_name):
     @closeable_client
     def generate(client):
