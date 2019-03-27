@@ -71,7 +71,7 @@ def verify_ip_list_file():
         open(IP_LIST_FILE, 'a').close()
 
 
-def get_ips_from_all_instances():
+def get_ips_from_external_instances():
     return {
         item for sublist in [
             # TODO: Remove hardcoded port - maybe include in ip.list file?
@@ -101,13 +101,18 @@ def forward(host, path, method, req_ip, result_list):
 
     res = requests.request(method, url, headers=headers)
     print(f'Forwarding completed with data response: {res.json()}')
-    if 200 <= res.status_code < 300:
+
+    extract_result(host, res.status_code, res.json(), result_list)
+
+
+def extract_result(host, code, data, result_list):
+    if 200 <= code < 300:
         result_list.append({
             'ip': host,
-            'data': res.json()
+            'data': data
         })
     else:
         result_list.append({
             'ip': host,
-            'error': res.json()
+            'error': data
         })
