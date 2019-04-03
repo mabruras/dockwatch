@@ -151,7 +151,7 @@ def time_now():
 def get_valid_containers(client):
     return [
         con for con in client.containers.list(all=True)
-        if not hidden_container(con) and not untagged_image(con.image)
+        if not hidden_container(con) and not untagged_image_in_con(con)
     ]
 
 
@@ -167,8 +167,11 @@ def removable_container(con):
     return con.labels.get('dockwatch.removable', 'false').lower() == 'true'
 
 
-def untagged_image(image):
-    return not image.tags
+def untagged_image_in_con(con):
+    try:
+        return not con.image.tags
+    except:
+        return True
 
 
 def get_image_name(img, only_app=False):
