@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import os
 import threading
 
@@ -83,6 +85,7 @@ def get_ips_from_external_instances():
 
 
 def forward_request(forward_ips, result):
+    print(f'Forwarding requests to all known external instances')
     thread_pool = [
         threading.Thread(target=forward, args=[
             f'{ip}', f'{request.path}', request.method, request.remote_addr, result
@@ -91,6 +94,7 @@ def forward_request(forward_ips, result):
 
     [t.start() for t in thread_pool]
     [t.join() for t in thread_pool]
+    print(f'Result from external instances: {result}')
 
 
 def forward(host, path, method, req_ip, result_list):
