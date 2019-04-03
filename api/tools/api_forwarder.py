@@ -5,6 +5,7 @@ from flask import request
 
 from connectors import network as net
 from tools import dw_connect as con
+from tools import data_formatter as formatter
 
 
 def forward(func):
@@ -41,19 +42,20 @@ def forward(func):
         complete = []
         failed_nodes = []
 
-        for n in node_responses:
-            ip = n.get('ip')
+        for node in node_responses:
+            ip = node.get('ip')
 
-            if n.get('error'):
-                failed_nodes.append(n)
+            if node.get('error'):
+                node['ip'] = ip
+                failed_nodes.append(node)
                 continue
 
-            for d in n.get('data'):
-                d['ip'] = ip
-                complete.append(d)
+            complete.append(node)
+
+        merged_data = formatter.merge_node_responses(complete)
 
         return {
-            'data': complete,
+            'data': merged_data,
             'errors': failed_nodes
         }
 

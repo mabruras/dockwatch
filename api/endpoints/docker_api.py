@@ -195,10 +195,8 @@ def get_container_version(con):
 def append_image_info(img_name):
     return {
         img_name: {
-            'image': {
-                'name': img_name.split('/')[-1],
-                'extra': img_name.split('/')[0:-1]
-            },
+            'name': img_name.split('/')[-1],
+            'extra': img_name.split('/')[0:-1],
             'status': dict(),
             'containers': list(),
         }
