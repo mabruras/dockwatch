@@ -13,7 +13,7 @@ def merge_node_responses(nodes):
         data = n.get('data')
 
         if not data:
-            print(f'Not data from {ip} to format')
+            print(f'No data from {ip} to format')
             continue
 
         if isinstance(data, dict):
@@ -66,8 +66,6 @@ def merge_node_responses(nodes):
                     # Update extra
                     img['extra'].extend(i.get('extra'))
 
-                result = [result[v] for v in result]
-
             elif data[0].get(UNIQUE_KEY_CONTAINERS, None):
                 print(f'Detected key [{UNIQUE_KEY_CONTAINERS}] in data set')
 
@@ -90,8 +88,6 @@ def merge_node_responses(nodes):
                     # Update instances
                     con['instances'].append(c)
 
-                result = [result[v] for v in result]
-
             print(f'Could not detect key [{UNIQUE_KEY_IMAGES}] in data set')
 
-    return result
+    return [result[v] for v in result]
