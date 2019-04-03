@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from flask import request
 
@@ -22,22 +23,19 @@ def forward(func):
         print(f'Found total of {len(forward_ips)} ips externally: {forward_ips}')
 
         node_responses = []  # List to store each node response
-        print(f'Forwarding requests to all known external instances')
         con.forward_request(forward_ips, node_responses)
-        print(f'Result from external instances: {node_responses}')
-
-        print(f'Executing request on current instance')
         exec_on_current(args, kwargs, node_responses)
-        print(f'Result after current instance: {node_responses}')
 
         return normalize_responses(node_responses), 200
 
     def exec_on_current(args, kwargs, node_responses):
+        print(f'Executing request on current instance')
         res, code = func(*args, **kwargs)
         print(f'Result from current instance ({code}): {res}')
 
         current_ip = net.get_ip_addr()
         con.extract_result(current_ip, code, res, node_responses)
+        print(f'Result after current instance: {node_responses}')
 
     def normalize_responses(node_responses):
         complete = []
