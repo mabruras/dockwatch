@@ -1,4 +1,9 @@
 # DockWatch
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENCE)
+[![](https://img.shields.io/docker/automated/mabruras/dockwatch.svg)](https://hub.docker.com/r/mabruras/dockwatch 'DockerHub')
+[![](https://img.shields.io/docker/stars/mabruras/dockwatch.svg)](https://hub.docker.com/r/mabruras/dockwatch 'DockerHub')
+[![](https://img.shields.io/docker/pulls/mabruras/dockwatch.svg)](https://hub.docker.com/r/mabruras/dockwatch 'DockerHub')
+
 Application for listing deployed containers in a single- or multi node environment.
 
 ## What is DockWatch
