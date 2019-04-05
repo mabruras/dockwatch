@@ -7,7 +7,6 @@ import { loading } from '../icons';
 import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
 import { Link } from 'react-router-dom';
-import ContainerImageLabel from './ContainerImageLabel';
 
 const DockContainerWrapper = styled.div`
   display: flex;
@@ -151,7 +150,7 @@ const StyledWarnText = styled.p`
   margin: 1rem;
 `;
 
-export default function DockContainer({ imageId, container, handleRefetch }) {
+export default function DockInstance({ imageId, container, handleRefetch }) {
   
   if (!container) {
     return null;
@@ -192,19 +191,14 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
     <DockContainerWrapper isRemoving={isRemoving}>
     <StyledObjectLink to={`/${imageId}/${container.name}`}>
     <ContainerNameWrapper>
-    <ContainerTag color={determineColorForString(container.name)}>
-          { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
+    <ContainerTag>
+          { restartingContainer ? <Spinner>{loading}</Spinner> : null }
     </ContainerTag>
       <ContainerName>
-        {container.name} running on <ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
+        <ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
       </ContainerName>
-
-    </ContainerNameWrapper>
-
-      <ContainerState>
       <DockContainerState container={container} />
-      </ContainerState>
-      <ContainerImageLabel container={container} />
+    </ContainerNameWrapper>
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }

@@ -9,6 +9,7 @@ import useApi from "../hooks/useApi";
 import Busy from "./Busy";
 import { loading } from "../icons";
 import { spin } from "../utils/animations";
+import DockStatusLabels from "./DockStatusLabels";
 
 const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
   text-align: center;
@@ -56,26 +57,6 @@ const ImageItem = styled(Flex)`
   }
 
   background-color: #222;
-`;
-
-const Versions = styled.div`
-  display: flex;
-`;
-
-const VersionLabel = styled.span`
-  margin: 5px;
-  background-color: ${props => props.color};
-  border-radius: 10px;
-  padding: 0.3rem 0.7rem;
-  color: #fff;
-  flex-basis: 20%;
-`;
-
-const ContainerStatus = styled.span``;
-
-const ContainerStatusAmount = styled.span`
-  margin-left: 0.5rem;
-  font-weight: bold;
 `;
 
 const NameExtras = styled.div`
@@ -134,12 +115,11 @@ export default function Images() {
   }, []);
 
   // eslint-disable-next-line
-  const [busy, nodes, error, fetchData] = useApi({
+  const [busy, imageResponse, error, fetchData] = useApi({
     endpoint: "images",
     fetchOnMount: true,
     initialData: []
   });
-  const images = Object.keys(nodes).map(k => nodes[k]).flat();
 
   return (
     <Container gutterTop>
@@ -150,47 +130,47 @@ export default function Images() {
       </RefreshNodeWrapper>
 
       <Busy busy={busy}>
-        <ImagesGrid>
-          {images.map(c => {
-            return (
-              <ImageItem
-                child
-                basis="32%"
-                gutterBottom
-                key={c.image.name}
-                alignItems="center"
-                justify="center"
-              >
-                <StyledImageLink to={`/${c.image.name}`}>
-                  <StyledImage>
-                    <NameExtras>
-                      {c.image.extra.map(e => (
-                        <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
-                      ))}
-                    </NameExtras>
-                    <StyledName color={determineColorForString(c.image.name)}>
-                      {c.image.name} ({c.containers.length})
-                    </StyledName>
+          {
+           <ImagesGrid>
+                { imageResponse.data && (
+                  <React.Fragment>
+                    {
+                       imageResponse.data.map(image => {
+                        return (
+                          <ImageItem
+                            child
+                            basis="32%"
+                            gutterBottom
+                            key={image.name}
+                            alignItems="center"
+                            justify="center"
+                          >
+                            <StyledImageLink to={`/${image.name}`}>
+                              <StyledImage>
+                                <NameExtras>
+                                  {image.extra.map(e => (
+                                    <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
+                                  ))}
+                                </NameExtras>
+                                <StyledName color={determineColorForString(image.name)}>
+                                  {image.name} ({image.containers.length})
+                                </StyledName>
+            
+                                <DockStatusLabels statuses={image.status} />
+                              </StyledImage>
+                            </StyledImageLink>
+                          </ImageItem>
+                        );
+                      })
+                    }
+                  </React.Fragment>
 
-                    <Versions>
-                      {Object.keys(c.status).map(status => (
-                        <VersionLabel
-                          key={status}
-                          color={determineColorForString(status + "STATUS")}
-                        >
-                          <ContainerStatus>{`${status}:`}</ContainerStatus>
-                          <ContainerStatusAmount>
-                            {c.status[status]}
-                          </ContainerStatusAmount>
-                        </VersionLabel>
-                      ))}
-                    </Versions>
-                  </StyledImage>
-                </StyledImageLink>
-              </ImageItem>
-            );
-          })}
+                )
+                 
+                }
         </ImagesGrid>
+            })
+          }
       </Busy>
     </Container>
   );
