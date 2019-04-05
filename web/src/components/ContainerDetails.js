@@ -49,7 +49,7 @@ export default function ContainerDetails (props) {
     }
   } = props;
 
-  const [fetchingContainer, container] = useApi({
+  const [fetchingContainer, containerResponse] = useApi({
     endpoint: `containers/${containerName}`,
     initialData: null,
     fetchOnMount: true,
@@ -58,8 +58,8 @@ export default function ContainerDetails (props) {
       dispatch({
         type: 'set-title',
         data: {
-          title: container.name,
-          titleColor: determineColorForString(container.name)
+          title: container.data.name,
+          titleColor: determineColorForString(container.data.name)
         }
       });
     },
@@ -68,15 +68,18 @@ export default function ContainerDetails (props) {
     }
   });
 
-  if(!container && !fetchingContainer && hasLoaded) {
+  if((!containerResponse || !containerResponse.data) && !fetchingContainer && hasLoaded) {
     return <NoResults />
   }
 
   return (
     <Busy busy={fetchingContainer}>
-      {fetchingContainer ? <DetailsTitle>Loading..</DetailsTitle> : (
-
-      <ContainerLogWrapper>
+      {!hasLoaded ? <DetailsTitle>Loading..</DetailsTitle> : (
+        containerResponse.data.map(containerMeta => (
+          <React.Fragment>
+          {
+            containerMeta.instances.map(container => (
+              <ContainerLogWrapper>
         <Flex
           justify="center"
           alignItems="center"
@@ -111,8 +114,7 @@ export default function ContainerDetails (props) {
                   Dock Log <span role="img" aria-label="log">📚</span>
               </DetailsTitle>
             <LogWrapper>
-            {container && (
-
+            {(container && false) && (
               <ScrollFollow
                 startFollowing={true}
                 render={({ follow, onScroll }) => (
@@ -130,8 +132,11 @@ export default function ContainerDetails (props) {
           </Container>
         </Flex>
       </ContainerLogWrapper>
+            ))
+          }
+        </React.Fragment>
+        ))
       )}
-      
       </Busy>
   );
 }
