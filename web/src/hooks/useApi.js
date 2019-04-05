@@ -31,7 +31,7 @@ export default function useApi(opts) {
       };
       
       const res = await fetch(
-        `http://localhost:1609/api/${opts.endpoint}`,
+        `/api/${opts.endpoint}`,
         {
           ...headers,
           method: opts.method || 'GET',
