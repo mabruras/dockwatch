@@ -10,6 +10,8 @@ from flask import request
 from connectors import network as net, udp_connector as udp
 from tools import cipher
 
+TIMEOUT_SECONDS = 0.5
+
 PROJECT_DIR = os.environ.get('WRK_DIR', '.')
 CONFIG_DIR = f'{PROJECT_DIR}{os.sep}conf'
 IP_LIST_FILE = f'{CONFIG_DIR}{os.sep}ip.list'
@@ -76,12 +78,21 @@ def verify_ip_list_file():
 def get_ips_from_external_instances():
     return {
         item for sublist in [
-            # TODO: Remove hardcoded port - maybe include in ip.list file?
-            requests.get(f'http://{ip}:1609/api/ips').json().get('ips') for ip in [
+            get_ips_from_remote(ip) for ip in [
                 i for i in get_known_ips() if i != net.get_ip_addr()
             ]
         ] for item in sublist
     }
+
+
+def get_ips_from_remote(host):
+    try:
+        # TODO: Remove hardcoded port - maybe include in ip.list file?
+        return requests.get(f'http://{host}:1609/api/ips', timeout=TIMEOUT_SECONDS).json().get('ips')
+    except Exception as e:
+        print(f'Fetching IP list from host {host} failed!')
+        print(e)
+        return []
 
 
 def forward_request(forward_ips, result):
@@ -103,10 +114,21 @@ def forward(host, path, method, req_ip, result_list):
     headers = {'X-Forwarded-For': req_ip}
     print(f'Forwarding request on behalf of {req_ip}, to {url}')
 
-    res = requests.request(method, url, headers=headers)
-    print(f'Forwarding completed with data response: {res.json()}')
+    try:
+        res = requests.request(method, url, headers=headers, timeout=TIMEOUT_SECONDS)
+        print(f'Forwarding completed with data response: {res.json()}')
 
-    extract_result(host, res.status_code, res.json(), result_list)
+        status = res.status_code
+        res_data = res.json()
+    except Exception as e:
+        err = f'Forwarding to host {host} failed!'
+        print(err)
+        print(e)
+
+        status = 500
+        res_data = err
+
+    extract_result(host, status, res_data, result_list)
 
 
 def extract_result(host, code, data, result_list):
