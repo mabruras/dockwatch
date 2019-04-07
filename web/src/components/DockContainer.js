@@ -6,26 +6,25 @@ import useApi from '../hooks/useApi';
 import { loading } from '../icons';
 import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
-import { Link } from 'react-router-dom';
 import ContainerImageLabel from './ContainerImageLabel';
 
 const DockContainerWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  border-bottom: 1px solid #624694;
+
   @media all and (max-width: 450px) {
     flex-direction: column;
   }
 
   ${props => props.isRemoving && css`
-  border-bottom: 0;
-  background-color: #222;
+     background-color: #222;
   `}
 
+  
 `;
 
-const StyledObjectLink = styled(({ ...props }) => <Link {...props} />)`
+const StyledObjectLink = styled.div`
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -151,7 +150,7 @@ const StyledWarnText = styled.p`
   margin: 1rem;
 `;
 
-export default function DockContainer({ imageId, container, handleRefetch }) {
+export default function DockContainer({ container, handleRefetch, handleContainerClick }) {
   
   if (!container) {
     return null;
@@ -190,13 +189,13 @@ export default function DockContainer({ imageId, container, handleRefetch }) {
   return (
     <div>
     <DockContainerWrapper isRemoving={isRemoving}>
-    <StyledObjectLink to={`/${imageId}/${container.name}`}>
+    <StyledObjectLink onClick={() => handleContainerClick()}>
     <ContainerNameWrapper>
     <ContainerTag color={determineColorForString(container.name)}>
           { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
     </ContainerTag>
       <ContainerName>
-        {container.name} running on <ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
+        {container.name}@<ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
       </ContainerName>
 
     </ContainerNameWrapper>
