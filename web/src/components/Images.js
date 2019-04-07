@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { Link } from "react-router-dom";
 import Container from "../styleguides/Container";
@@ -10,6 +10,7 @@ import Busy from "./Busy";
 import { loading } from "../icons";
 import { spin } from "../utils/animations";
 import DockStatusLabels from "./DockStatusLabels";
+import StyledSearchInput from "../styleguides/StyledSearchInput";
 
 const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
   text-align: center;
@@ -101,12 +102,16 @@ const RefreshNode = styled.button`
 
 const RefreshNodeWrapper = styled.div`
   display: flex;
-  margin: 0.5rem;
   justify-content: center;
 `;
-
+const FilterImagesWrapper = styled.div`
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  padding: 0 1.5rem;
+`;
 export default function Images() {
   const { dispatch } = useContext(TitleContext);
+  const [filterInput, setFilterInput] = useState("");
 
   useEffect(() => {
     dispatch({
@@ -128,14 +133,18 @@ export default function Images() {
           <Spinner isLoading={busy}>{loading}</Spinner> Refresh
         </RefreshNode>
       </RefreshNodeWrapper>
-
+      <FilterImagesWrapper>
+        <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search images..." />   
+      </FilterImagesWrapper>
       <Busy busy={busy}>
           {
            <ImagesGrid>
                 { imageResponse.data && (
                   <React.Fragment>
                     {
-                       imageResponse.data.map(image => {
+                       imageResponse.data
+                       .filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase()))
+                       .map(image => {
                         return (
                           <ImageItem
                             child
@@ -169,7 +178,7 @@ export default function Images() {
                  
                 }
         </ImagesGrid>
-            })
+            
           }
       </Busy>
     </Container>

@@ -8,12 +8,14 @@ import NoContentFound from './NoResults';
 import styled from 'styled-components';
 import DockStatusLabels from './DockStatusLabels';
 import { Link } from 'react-router-dom';
+import StyledSearchInput from '../styleguides/StyledSearchInput';
 
 const Instance = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  border-bottom: 3px solid ${props => props.color || "#ccc"};
+  border-bottom: 3px solid ${props => props.color || "transparent"};
+
   @media all and (max-width: 450px) {
     flex-direction: column;
   }
@@ -22,17 +24,6 @@ const Instance = styled.div`
 const InstanceTitle = styled.h2`
   color: #fff;
   margin: 0;
-`;
-const FilterInstances = styled.input`
-  font-size: 2rem;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  background: transparent;
-
-  &::placeholder {
-    color: #777;
-  }
 `;
 
 const DockLink = styled(({ ...props }) => <Link {...props} />)`
@@ -77,10 +68,10 @@ export default function Containers(props) {
       {(containersResponse && containersResponse.data) && (
         <Container>
           <Instance padded>
-            <FilterInstances onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search container names..."></FilterInstances>   
+            <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search container names..." />   
           </Instance>
         {containersResponse.data.filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase())).map(item => (
-          <React.Fragment>
+          <React.Fragment key={item.name + item.ip}>
             <DockLink to={`/${imageId}/${item.name}`}>
             <Instance color={determineColorForString(item.name)}>
               <InstanceTitle color={determineColorForString(item.name)}>{item.name}</InstanceTitle>
