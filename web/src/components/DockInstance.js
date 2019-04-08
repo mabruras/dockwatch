@@ -160,7 +160,7 @@ export default function DockInstance({ imageId, container, handleRefetch }) {
   
   // eslint-disable-next-line
   const [restartingContainer, restartResponse, err1, restartContainer] = useApi({
-    endpoint: `containers/${container.name}/restart`,
+    endpoint: `images/${imageId}/containers/${container.name}/restart`,
     method: "POST",
     successDelay: 2000,
     onSuccess: () => {
@@ -170,7 +170,7 @@ export default function DockInstance({ imageId, container, handleRefetch }) {
 
    // eslint-disable-next-line
   const [removingContainer, removeResponse, err2, removeContainer] = useApi({
-    endpoint: `containers/${container.name}/delete`,
+    endpoint: `images/${imageId}/containers/${container.name}/delete`,
     method: "DELETE",
     successDelay: 2000,
     onSuccess: () => {

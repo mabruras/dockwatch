@@ -61,31 +61,33 @@ def get_app_versions(app_name):
     return response(result)
 
 
-@app.route('/api/containers/<con_id>', methods=['GET'])
+@app.route('/api/images/<app_name>/containers/<con_id>', methods=['GET'])
 @cross_origin()
-def get_container_info(con_id):
-    result = api.get_container_info(con_id)
+def get_container_info(app_name, con_id):
+    result = api.get_container_info(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/restart', methods=['POST'])
+@app.route('/api/images/<app_name>/containers/<con_id>/restart', methods=['POST'])
 @cross_origin()
-def restart_container(con_id):
-    result = api.restart_container(con_id)
+def restart_container(app_name, con_id):
+    result = api.restart_container(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/delete', methods=['DELETE'])
+@app.route('/api/images/<app_name>/containers/<con_id>/delete', methods=['DELETE'])
 @cross_origin()
-def remove_container(con_id):
-    result = api.remove_container(con_id)
+def remove_container(app_name, con_id):
+    result = api.remove_container(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/logs', methods=['GET'])
-def get_container_logs(con_id):
-    generator = api.get_container_logs(con_id)
-    return Response(generator(), mimetype='event/stream-text')
+@app.route('/api/images/<app_name>/containers/<con_id>/logs', methods=['GET'])
+def get_container_logs(app_name, con_id):
+    result, code = api.get_container_logs(app_name, con_id)
+    if code == 200:
+        return Response(result(), mimetype='event/stream-text')
+    return response((result, code))
 
 
 def response(result):

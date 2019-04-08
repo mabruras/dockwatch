@@ -67,13 +67,13 @@ export default function ContainerDetails(props) {
 
   const {
     match: {
-      params: { containerName }
+      params: { imageId, containerName }
     }
   } = props;
 
   //eslint-disable-next-line
   const [fetchingContainer, containerResponse, err, refetch] = useApi({
-    endpoint: `containers/${containerName}`,
+    endpoint: `images/${imageId}/containers/${containerName}`,
     initialData: null,
     fetchOnMount: true,
     onSuccess: container => {
@@ -163,6 +163,7 @@ export default function ContainerDetails(props) {
                         >
                           <DockContainer
                             container={container}
+                            imageId={imageId}
                             handleContainerClick={() =>
                               setSelectedContainer(container)
                             }
@@ -187,7 +188,7 @@ export default function ContainerDetails(props) {
                     render={({ follow, onScroll }) => (
                       <LazyLog
                         extraLines={5}
-                        url={`/containers/${selectedContainer.name}/logs`}
+                        url={`/images/${imageId}/containers/${selectedContainer.name}/logs`}
                         stream
                         follow={follow}
                         onScroll={onScroll}
