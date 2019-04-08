@@ -71,8 +71,12 @@ def get_containers(client, image):
 
 @closeable_client
 @af.forward
-def get_container_info(client, con_name):
-    container = next((extract_container_info(c) for c in get_valid_containers(client) if c.name == con_name), None)
+def get_container_info(client, image, con_name):
+    container = next((
+        extract_container_info(c) for c in get_valid_containers(client)
+        if c.name == con_name and image == get_image_name(c.image, only_app=True)
+    ), None)
+
     if not container:
         err = f'No container with name {con_name} available'
         print(err)
@@ -83,9 +87,19 @@ def get_container_info(client, con_name):
 
 @closeable_client
 @af.forward
-def restart_container(client, con_name):
+def restart_container(client, image, con_name):
     try:
-        con = client.containers.get(con_name)
+        con = next((
+            extract_container_info(c) for c in get_valid_containers(client)
+            if c.name == con_name and image == get_image_name(c.image, only_app=True)
+        ), None)
+
+        if not con:
+            err = f'No Container with name ({con_name}) found'
+            print(err)
+
+            return {'error': err}, 400
+
         if restartable_container(con):
             print(f'Restarting container with name {con_name}')
             con.restart()
@@ -105,9 +119,19 @@ def restart_container(client, con_name):
 
 @closeable_client
 @af.forward
-def remove_container(client, con_name):
+def remove_container(client, image, con_name):
     try:
-        con = client.containers.get(con_name)
+        con = next((
+            extract_container_info(c) for c in get_valid_containers(client)
+            if c.name == con_name and image == get_image_name(c.image, only_app=True)
+        ), None)
+
+        if not con:
+            err = f'No Container with name ({con_name}) found'
+            print(err)
+
+            return {'error': err}, 400
+
         if removable_container(con):
             print(f'Removing container with name {con_name}')
             client.containers.get(con_name).remove(force=True)
@@ -125,11 +149,23 @@ def remove_container(client, con_name):
 
 
 @af.forward
-def get_container_logs(con_name):
+def get_container_logs(image, con_name):
+
     @closeable_client
     def generate(client):
         started = time_now()
         print(f'Opening log stream for container {con_name}')
+
+        con = next((
+            extract_container_info(c) for c in get_valid_containers(client)
+            if c.name == con_name and image == get_image_name(c.image, only_app=True)
+        ), None)
+
+        if not con:
+            err = f'No Container with name ({con_name}) found'
+            print(err)
+
+            return {'error': err}, 400
 
         for row in client.containers.get(con_name).logs(stream=True):
             if (time_now() - started) > LOG_READ_THRESHOLD:
@@ -138,7 +174,7 @@ def get_container_logs(con_name):
             yield row.decode("utf-8")
         print(f'Closing stream of container logs (name: {con_name})')
 
-    return generate
+    return generate, 200
 
 
 def time_now():
