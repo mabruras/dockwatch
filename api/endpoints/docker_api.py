@@ -251,6 +251,10 @@ def extract_container_info(container):
             'name': get_image_name(container.image),
             'version': get_image_version(container.image),
         },
+        'ports': {
+            'published': container.attrs.get('NetworkSettings', dict()).get('Ports', dict())
+
+        },
         'created': container.attrs.get('Created', None),
         'status': container.status,
         'labels': container.labels,
