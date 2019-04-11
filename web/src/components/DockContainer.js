@@ -8,6 +8,7 @@ import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
 import ContainerImageLabel from './ContainerImageLabel';
 import ContainerPorts from './ContainerPorts';
+import ContainerPortsSlim from './ContainerPortsSlim';
 
 const DockContainerWrapper = styled.div`
   display: flex;
@@ -205,7 +206,7 @@ export default function DockContainer({ container, imageId, handleRefetch, handl
         <DockContainerState container={container} />
       </ContainerState>
       <ContainerImageLabel container={container} />
-      <ContainerPorts ports={container.ports} hideOnEmptyPorts={true} />
+      <ContainerPortsSlim ports={container.ports} hideOnEmptyPorts={true} />
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }

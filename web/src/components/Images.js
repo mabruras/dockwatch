@@ -133,53 +133,64 @@ export default function Images() {
           <Spinner isLoading={busy}>{loading}</Spinner> Refresh
         </RefreshNode>
       </RefreshNodeWrapper>
-      <FilterImagesWrapper>
-        <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search images..." />   
-      </FilterImagesWrapper>
-      <Busy busy={busy}>
-          {
-           <ImagesGrid>
-                { imageResponse.data && (
-                  <React.Fragment>
-                    {
-                       imageResponse.data
-                       .filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase()))
-                       .map(image => {
-                        return (
-                          <ImageItem
-                            child
-                            basis="32%"
-                            gutterBottom
-                            key={image.name}
-                            alignItems="center"
-                            justify="center"
-                          >
-                            <StyledImageLink to={`/${image.name}`}>
-                              <StyledImage>
-                                <NameExtras>
-                                  {image.extra.map(e => (
-                                    <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
-                                  ))}
-                                </NameExtras>
-                                <StyledName color={determineColorForString(image.name)}>
-                                  {image.name} ({image.containers.length})
-                                </StyledName>
-            
-                                <DockStatusLabels statuses={image.status} />
-                              </StyledImage>
-                            </StyledImageLink>
-                          </ImageItem>
-                        );
-                      })
-                    }
-                  </React.Fragment>
+      {imageResponse.data && (
+        <FilterImagesWrapper>
+          <StyledSearchInput
+            onChange={e => setFilterInput(e.target.value)}
+            value={filterInput}
+            placeholder="Search images..."
+          />
+        </FilterImagesWrapper>
+      )}
 
-                )
-                 
-                }
-        </ImagesGrid>
-            
-          }
+      <Busy busy={busy}>
+        {
+          <ImagesGrid>
+            {imageResponse.data && (
+              <React.Fragment>
+                {imageResponse.data
+                  .filter(
+                    item =>
+                      filterInput.length === 0 ||
+                      item.name
+                        .toLowerCase()
+                        .includes(filterInput.toLowerCase())
+                  )
+                  .map(image => {
+                    return (
+                      <ImageItem
+                        child
+                        basis="32%"
+                        gutterBottom
+                        key={image.name}
+                        alignItems="center"
+                        justify="center"
+                      >
+                        <StyledImageLink to={`/${image.name}`}>
+                          <StyledImage>
+                            <NameExtras>
+                              {image.extra.map(e => (
+                                <ImageExtraName>
+                                  {`${e}`.toUpperCase()}
+                                </ImageExtraName>
+                              ))}
+                            </NameExtras>
+                            <StyledName
+                              color={determineColorForString(image.name)}
+                            >
+                              {image.name} ({image.containers.length})
+                            </StyledName>
+
+                            <DockStatusLabels statuses={image.status} />
+                          </StyledImage>
+                        </StyledImageLink>
+                      </ImageItem>
+                    );
+                  })}
+              </React.Fragment>
+            )}
+          </ImagesGrid>
+        }
       </Busy>
     </Container>
   );
