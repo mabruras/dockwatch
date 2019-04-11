@@ -193,7 +193,7 @@ export default function ContainerDetails(props) {
                     render={({ follow, onScroll }) => (
                       <LazyLog
                         extraLines={5}
-                        url={`/images/${imageId}/containers/${selectedContainer.name}/logs`}
+                        url={`/api/images/${imageId}/containers/${selectedContainer.name}/logs?ip=${selectedContainer.ip}`}
                         stream
                         follow={follow}
                         onScroll={onScroll}

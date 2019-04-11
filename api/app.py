@@ -4,7 +4,7 @@
 import json
 import os
 
-from flask import Flask, Response
+from flask import Flask, Response, stream_with_context
 from flask_cors import CORS, cross_origin
 
 from endpoints import docker_api as api
@@ -85,8 +85,12 @@ def remove_container(app_name, con_id):
 @app.route('/api/images/<app_name>/containers/<con_id>/logs', methods=['GET'])
 def get_container_logs(app_name, con_id):
     result, code = api.get_container_logs(app_name, con_id)
+
     if code == 200:
         return Response(result(), mimetype='event/stream-text')
+    if code == 301:
+        return Response(stream_with_context(result()), mimetype='event/stream-text')
+
     return response((result, code))
 
 
@@ -116,10 +120,7 @@ def ok_response(result):
 
 def configure():
     if DW_MODE == DW_MODE_MULTI:
-        print('Initializing broadcast listener')
-        con.start_broadcast_listener()
-        print('Initializing first broadcast')
-        con.broadcast_ip()
+        con.init_multi_mode()
 
 
 if __name__ == '__main__':
