@@ -4,8 +4,8 @@
 from flask import request
 
 from connectors import network as net
-from tools import dw_connect as con
 from tools import data_formatter as formatter
+from tools import dw_connect as con
 
 
 def forward(func):
@@ -58,5 +58,31 @@ def forward(func):
             'data': merged_data,
             'errors': failed_nodes
         }
+
+    return inner
+
+
+def streamable(func):
+    def inner(*args, **kwargs):
+        req_is_forwarded = request.headers.get('X-Forwarded-For', None)
+        req_host = request.args.get('ip', None)
+
+        if not req_host:
+            err = f'No host was requested, please include "ip" as query param'
+            print(err)
+            return err, 400
+
+        if req_is_forwarded or net.get_ip_addr() == req_host:
+            print(f'Fetching logs from {net.get_ip_addr()}')
+            print(f'X-Forwarded-For: {req_is_forwarded}')
+            res, code = func(*args, **kwargs)
+
+            return res, code
+        else:
+            # redirect to correct node
+            print(f'Forwarding logs request to {req_host}')
+            result = con.remote_logs(req_host)
+
+            return result, 301
 
     return inner

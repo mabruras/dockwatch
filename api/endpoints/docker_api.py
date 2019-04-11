@@ -148,7 +148,7 @@ def remove_container(client, image, con_name):
         return {'error': err}, 500
 
 
-@af.forward
+@af.streamable
 def get_container_logs(image, con_name):
 
     @closeable_client
