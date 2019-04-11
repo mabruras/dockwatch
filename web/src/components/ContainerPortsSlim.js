@@ -8,11 +8,24 @@ const NoPortsFoundMessage = styled.p`
 
 const PortInfo = styled.p`
   color: #fff;
+  margin: 0.1rem;
+  font-size: 0.9rem;
 `;
 
 const PortHighlight = styled.span`
-  color: darkcyan;
+  color: ${props => props.color || "darkcyan"};
   font-weight: bold;
+`;
+
+const PortMap = styled.div`
+    display: flex;
+`;
+const ContentPadder = styled.div`
+    margin: 0.5rem;
+`;
+const Delimiter = styled.span`
+    color: #aaa;
+    margin: 0 0.2rem;
 `;
 
 export default function ContainerPortsSlim({ ports, hideOnEmptyPorts }) {
@@ -42,27 +55,22 @@ export default function ContainerPortsSlim({ ports, hideOnEmptyPorts }) {
   }
 
   return (
-    <div>
+    <ContentPadder>
       {allPublishedPorts.map(port => (
         <div key={port}>
           {ports.published[port] &&
             ports.published[port].map((portItem, idx) => (
-              <div key={idx}>
-                <div key={idx}>
+              <PortMap key={idx}>
                   <PortInfo>
-                    <PortHighlight>{port}</PortHighlight> (container) ->{" "}
-                    <PortHighlight>{portItem.HostPort}</PortHighlight> (
-                    {portItem.HostIp === "127.0.0.1" ||
-                    portItem.HostIp === "0.0.0.0"
-                      ? `localhost`
-                      : portItem.HostIp}
-                    )
+                    <PortHighlight color={"#777"}>{portItem.HostIp}:</PortHighlight>
+                    <PortHighlight>{portItem.HostPort}</PortHighlight>
+                     <Delimiter>-></Delimiter>
+                    <PortHighlight>{port}</PortHighlight>
                   </PortInfo>
-                </div>
-              </div>
+              </PortMap>
             ))}
         </div>
       ))}
-    </div>
+    </ContentPadder>
   );
 }

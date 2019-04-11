@@ -7,7 +7,7 @@ const NoPortsFoundMessage = styled.p`
 `;
 
 const PortInfo = styled.p`
-  color: #fff;
+  color: ${props => props.color || "#fff"};
   border: 1px solid #444;
   padding: 0.5rem 0;
   text-align: center;
@@ -62,31 +62,31 @@ export default function ContainerPorts({ ports, hideOnEmptyPorts }) {
   return (
     <GridList>
       <GridItem>
-        <Header>Container</Header>
-        <Header>Host</Header>
         <Header>Host IP</Header>
+        <Header>Host</Header>
+        <Header>Container</Header>
       </GridItem>
       {allPublishedPorts.map(port => (
-        <React.Fragment>
+        <React.Fragment key={port}>
           {ports.published[port] &&
             ports.published[port].map((portItem, idx) => (
               <GridItem key={idx}>
-                <PortInfo>
-                  <PortHighlight>{port}</PortHighlight>
-                </PortInfo>
+                <PortInfo color={"#777"}>{portItem.HostIp}</PortInfo>
                 <PortInfo>
                   <PortHighlight>{portItem.HostPort}</PortHighlight>
                 </PortInfo>
-                <PortInfo>{portItem.HostIp}</PortInfo>
+                <PortInfo>
+                  <PortHighlight>{port}</PortHighlight>
+                </PortInfo>
               </GridItem>
             ))}
           {!ports.published[port] && port && (
             <GridItem>
+              <PortInfo>-</PortInfo>
+              <PortInfo>-</PortInfo>
               <PortInfo>
                 <PortHighlight>{port}</PortHighlight>
               </PortInfo>
-              <PortInfo>-</PortInfo>
-              <PortInfo>-</PortInfo>
             </GridItem>
           )}
         </React.Fragment>
