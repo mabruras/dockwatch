@@ -12,6 +12,7 @@ import DockContainerState from "./DockContainerState";
 import ContainerLabel from "./ContainerLabels";
 import ContainerImageLabel from "./ContainerImageLabel";
 import DockContainer from "./DockContainer";
+import ContainerPorts from "./ContainerPorts";
 
 const ContainerLogWrapper = styled.div`
   margin: 1rem;
@@ -23,7 +24,8 @@ const LogWrapper = styled.div`
   margin: 0.5rem 0;
 `;
 
-const DetailsTitle = styled.h2`
+const DetailsTitle = styled.h1`
+  font-size: 2.7rem;
   color: #fff;
   margin: 0.5rem 0;
 `;
@@ -33,7 +35,7 @@ const ContainerName = styled.span`
   color: ${props => props.color || "orange"};
 `;
 
-const DetailsSubTitle = styled.h3`
+const DetailsSubTitle = styled.h2`
   color: #dbdbdb;
   margin: 0.5rem 0;
   margin-top: 1rem;
@@ -47,9 +49,8 @@ const StyledInstanceList = styled.ul`
 `;
 
 const StyledInstanceListItem = styled.li`
-  border-bottom: 1px solid #624694;
   transition: all 0.1s ease-in-out;
-  background-color: #222;
+  background-color: #111;
 
   ${props =>
     props.isSelected &&
@@ -151,6 +152,10 @@ export default function ContainerDetails(props) {
                       : ""}
                   </DetailsSubTitle>
                   <ContainerLabel container={selectedContainer} />
+                  <DetailsSubTitle>
+                    Port mapping
+                  </DetailsSubTitle>
+                  <ContainerPorts ports={selectedContainer.ports} />
                 </SelectedContainerInfo>
                 {containerResponse.data[0].instances.length > 1 && (
                   <div>
