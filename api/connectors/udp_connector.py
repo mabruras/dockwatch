@@ -46,4 +46,7 @@ def broadcast_listener(broadcast_addr, callback):
     print(f'Received broadcast of {len(data[0])} bytes from {data[1]}')
     cs.close()
 
-    callback(data)
+    try:
+        callback(data)
+    except:
+        print(f'Failed handling received broadcast: {data}')
