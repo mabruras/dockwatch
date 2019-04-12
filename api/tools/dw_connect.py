@@ -55,6 +55,7 @@ def start_broadcast_listener():
 
 def update_known_ips(data):
     msg, sender = data
+    print(f'Received broadcast from {sender}')
     msg = str(msg, 'utf-8')
     msg = ast.literal_eval(msg)
 
@@ -62,14 +63,10 @@ def update_known_ips(data):
     if not received:
         print(f'Received broadcast was not intended for this DockWatch. Sender: {sender}')
         return
-    print(f'RECEIVED : {received}')
 
     ip_list = cipher.decrypt_message(received, SECRET)
-    print(f'IP LIST : {ip_list}')
-    print(f'IP LIST (type) : {type(ip_list)}')
 
     decrypted = ast.literal_eval(ip_list).get('ip_list', None)
-    print(f'DECRYPTED : {decrypted}')
     if not decrypted:
         print(f'Could not decrypt broadcast. Sender: {sender}')
         return
