@@ -6,27 +6,25 @@ import useApi from '../hooks/useApi';
 import { loading } from '../icons';
 import { spin } from '../utils/animations';
 import { isWebUri } from 'valid-url';
-import ContainerImageLabel from './ContainerImageLabel';
-import ContainerPorts from './ContainerPorts';
-import ContainerPortsSlim from './ContainerPortsSlim';
+import { Link } from 'react-router-dom';
 
 const DockContainerWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-
+  border-bottom: 1px solid #624694;
   @media all and (max-width: 450px) {
     flex-direction: column;
   }
 
   ${props => props.isRemoving && css`
-     background-color: #222;
+  border-bottom: 0;
+  background-color: #222;
   `}
 
-  
 `;
 
-const StyledObjectLink = styled.div`
+const StyledObjectLink = styled(({ ...props }) => <Link {...props} />)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -152,7 +150,7 @@ const StyledWarnText = styled.p`
   margin: 1rem;
 `;
 
-export default function DockContainer({ container, imageId, handleRefetch, handleContainerClick }) {
+export default function DockInstance({ imageId, container, handleRefetch }) {
   
   if (!container) {
     return null;
@@ -191,22 +189,16 @@ export default function DockContainer({ container, imageId, handleRefetch, handl
   return (
     <div>
     <DockContainerWrapper isRemoving={isRemoving}>
-    <StyledObjectLink onClick={() => handleContainerClick()}>
+    <StyledObjectLink to={`/${imageId}/${container.name}`}>
     <ContainerNameWrapper>
-    <ContainerTag color={determineColorForString(container.name)}>
-          { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
+    <ContainerTag>
+          { restartingContainer ? <Spinner>{loading}</Spinner> : null }
     </ContainerTag>
       <ContainerName>
-        {container.name}@<ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
+        <ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
       </ContainerName>
-
+      <DockContainerState container={container} />
     </ContainerNameWrapper>
-
-      <ContainerState>
-        <DockContainerState container={container} />
-      </ContainerState>
-      <ContainerImageLabel container={container} />
-      <ContainerPortsSlim ports={container.ports} hideOnEmptyPorts={true} />
       {
         removingContainer && <StyledMessage>Removing container..</StyledMessage>
       }

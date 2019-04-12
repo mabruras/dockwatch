@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { Link } from "react-router-dom";
 import Container from "../styleguides/Container";
@@ -7,9 +7,10 @@ import determineColorForString from "../utils/determineColorForString";
 import { TitleContext } from "../context/AppTitleContext";
 import useApi from "../hooks/useApi";
 import Busy from "./Busy";
-import { SelectedNodeContext } from "../context/SelectedNodeContext";
 import { loading } from "../icons";
 import { spin } from "../utils/animations";
+import DockStatusLabels from "./DockStatusLabels";
+import StyledSearchInput from "../styleguides/StyledSearchInput";
 
 const StyledImageLink = styled(({ ...props }) => <Link {...props} />)`
   text-align: center;
@@ -59,31 +60,6 @@ const ImageItem = styled(Flex)`
   background-color: #222;
 `;
 
-const ChangeNodeImageItem =styled(ImageItem)`
-  background-color: #62469452;
-  padding: 2rem;
-`;
-
-const Versions = styled.div`
-  display: flex;
-`;
-
-const VersionLabel = styled.span`
-  margin: 5px;
-  background-color: ${props => props.color};
-  border-radius: 10px;
-  padding: 0.3rem 0.7rem;
-  color: #fff;
-  flex-basis: 20%;
-`;
-
-const ContainerStatus = styled.span``;
-
-const ContainerStatusAmount = styled.span`
-  margin-left: 0.5rem;
-  font-weight: bold;
-`;
-
 const NameExtras = styled.div`
   margin: 0.5rem 0;
 `;
@@ -126,13 +102,16 @@ const RefreshNode = styled.button`
 
 const RefreshNodeWrapper = styled.div`
   display: flex;
-  margin: 0.5rem;
   justify-content: center;
 `;
-
+const FilterImagesWrapper = styled.div`
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+  padding: 0 1.5rem;
+`;
 export default function Images() {
   const { dispatch } = useContext(TitleContext);
-  const selectedNodeContext = useContext(SelectedNodeContext);
+  const [filterInput, setFilterInput] = useState("");
 
   useEffect(() => {
     dispatch({
@@ -141,7 +120,7 @@ export default function Images() {
   }, []);
 
   // eslint-disable-next-line
-  const [busy, images, error, fetchData] = useApi({
+  const [busy, imageResponse, error, fetchData] = useApi({
     endpoint: "images",
     fetchOnMount: true,
     initialData: []
@@ -154,71 +133,64 @@ export default function Images() {
           <Spinner isLoading={busy}>{loading}</Spinner> Refresh
         </RefreshNode>
       </RefreshNodeWrapper>
+      {imageResponse.data && (
+        <FilterImagesWrapper>
+          <StyledSearchInput
+            onChange={e => setFilterInput(e.target.value)}
+            value={filterInput}
+            placeholder="Search images..."
+          />
+        </FilterImagesWrapper>
+      )}
 
-      <Busy busy={busy || !selectedNodeContext.hasLoaded}>
-        <ImagesGrid>
-          <ChangeNodeImageItem
-            child
-            basis="32%"
-            gutterBottom
-            alignItems="center"
-            justify="center"
-            fullWidth
-          >
-            <StyledImageLink to={`/nodes`}>
-              <ImageExtraName>
-                {selectedNodeContext.hasLoaded
-                  ? selectedNodeContext.data.name
-                  : "Loading.."}
-              </ImageExtraName>
-              <ImageExtraName>
-                {selectedNodeContext.hasLoaded
-                  ? selectedNodeContext.data.baseUrl
-                  : "Loading.."}
-              </ImageExtraName>
-              <StyledName color={"#fff"}>Change Node</StyledName>
-            </StyledImageLink>
-          </ChangeNodeImageItem>
-          {images.map(c => {
-            return (
-              <ImageItem
-                child
-                basis="32%"
-                gutterBottom
-                key={c.image.name}
-                alignItems="center"
-                justify="center"
-              >
-                <StyledImageLink to={`/${c.image.name}`}>
-                  <StyledImage>
-                    <NameExtras>
-                      {c.image.extra.map(e => (
-                        <ImageExtraName>{`${e}`.toUpperCase()}</ImageExtraName>
-                      ))}
-                    </NameExtras>
-                    <StyledName color={determineColorForString(c.image.name)}>
-                      {c.image.name} ({c.containers.length})
-                    </StyledName>
+      <Busy busy={busy}>
+        {
+          <ImagesGrid>
+            {imageResponse.data && (
+              <React.Fragment>
+                {imageResponse.data
+                  .filter(
+                    item =>
+                      filterInput.length === 0 ||
+                      item.name
+                        .toLowerCase()
+                        .includes(filterInput.toLowerCase())
+                  )
+                  .map(image => {
+                    return (
+                      <ImageItem
+                        child
+                        basis="32%"
+                        gutterBottom
+                        key={image.name}
+                        alignItems="center"
+                        justify="center"
+                      >
+                        <StyledImageLink to={`/${image.name}`}>
+                          <StyledImage>
+                            <NameExtras>
+                              {image.extra.map(e => (
+                                <ImageExtraName>
+                                  {`${e}`.toUpperCase()}
+                                </ImageExtraName>
+                              ))}
+                            </NameExtras>
+                            <StyledName
+                              color={determineColorForString(image.name)}
+                            >
+                              {image.name} ({image.containers.length})
+                            </StyledName>
 
-                    <Versions>
-                      {Object.keys(c.status).map(status => (
-                        <VersionLabel
-                          key={status}
-                          color={determineColorForString(status + "STATUS")}
-                        >
-                          <ContainerStatus>{`${status}:`}</ContainerStatus>
-                          <ContainerStatusAmount>
-                            {c.status[status]}
-                          </ContainerStatusAmount>
-                        </VersionLabel>
-                      ))}
-                    </Versions>
-                  </StyledImage>
-                </StyledImageLink>
-              </ImageItem>
-            );
-          })}
-        </ImagesGrid>
+                            <DockStatusLabels statuses={image.status} />
+                          </StyledImage>
+                        </StyledImageLink>
+                      </ImageItem>
+                    );
+                  })}
+              </React.Fragment>
+            )}
+          </ImagesGrid>
+        }
       </Busy>
     </Container>
   );
