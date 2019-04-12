@@ -1,12 +1,21 @@
 #! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import json
 import os
 
-from flask import Flask, Response
+from flask import Flask, Response, stream_with_context
 from flask_cors import CORS, cross_origin
 
 from endpoints import docker_api as api
 from endpoints import static_web as web
+from tools import dw_connect as con
+
+DW_PORT = os.environ.get('DW_PORT', 1609)
+
+DW_MODE_MULTI = 'multi'
+DW_MODE_SINGLE = 'single'
+DW_MODE = os.environ.get('DW_MODE', DW_MODE_SINGLE)
 
 app = Flask(__name__, static_folder='../web/static')
 CORS(app, origins="*", allow_headers=[
@@ -29,6 +38,15 @@ def react(path):
     return web.get_static_files(path)
 
 
+@app.route('/api/ips', methods=['GET'])
+def get_known_ips():
+    ip_list = {
+        'ips': list(con.get_known_ips())
+    }
+
+    return response((ip_list, 200))
+
+
 @app.route('/api/images', methods=['GET'])
 @cross_origin()
 def get_applications():
@@ -43,31 +61,37 @@ def get_app_versions(app_name):
     return response(result)
 
 
-@app.route('/api/containers/<con_id>', methods=['GET'])
+@app.route('/api/images/<app_name>/containers/<con_id>', methods=['GET'])
 @cross_origin()
-def get_container_info(con_id):
-    result = api.get_container_info(con_id)
+def get_container_info(app_name, con_id):
+    result = api.get_container_info(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/restart', methods=['POST'])
+@app.route('/api/images/<app_name>/containers/<con_id>/restart', methods=['POST'])
 @cross_origin()
-def restart_container(con_id):
-    result = api.restart_container(con_id)
+def restart_container(app_name, con_id):
+    result = api.restart_container(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/delete', methods=['DELETE'])
+@app.route('/api/images/<app_name>/containers/<con_id>/delete', methods=['DELETE'])
 @cross_origin()
-def remove_container(con_id):
-    result = api.remove_container(con_id)
+def remove_container(app_name, con_id):
+    result = api.remove_container(app_name, con_id)
     return response(result)
 
 
-@app.route('/api/containers/<con_id>/logs', methods=['GET'])
-def get_container_logs(con_id):
-    generator = api.get_container_logs(con_id)
-    return Response(generator(), mimetype='event/stream-text')
+@app.route('/api/images/<app_name>/containers/<con_id>/logs', methods=['GET'])
+def get_container_logs(app_name, con_id):
+    result, code = api.get_container_logs(app_name, con_id)
+
+    if code == 200:
+        return Response(result(), mimetype='event/stream-text')
+    if code == 301:
+        return Response(stream_with_context(result()), mimetype='event/stream-text')
+
+    return response((result, code))
 
 
 def response(result):
@@ -80,7 +104,7 @@ def response(result):
 
 def err_response(err, code):
     return Response(
-        response=json.dumps({'error': err}),
+        response=json.dumps(err),
         mimetype='application/json',
         status=code,
     )
@@ -94,5 +118,11 @@ def ok_response(result):
     )
 
 
+def configure():
+    if DW_MODE == DW_MODE_MULTI:
+        con.init_multi_mode()
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=os.environ.get('DW_PORT', 1609))
+    configure()
+    app.run(host='0.0.0.0', port=DW_PORT)

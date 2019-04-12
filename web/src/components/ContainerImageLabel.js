@@ -4,10 +4,18 @@ import determineColorForString from '../utils/determineColorForString';
 
 const ImageName = styled.span`
   font-weight: bold;
-  color: ${props => props.color || "#fff"}
+  color: ${props => props.color || "#fff"};
+  &:hover {
+    color: #fff;
+  }
 `;
 const ImageVersion = styled.span`
-  color: ${props => props.color || "#fff"}
+  color: ${props => props.color || "#fff"};
+
+
+  &:hover {
+    color: #fff;
+  }
 `;
 
 export default function ContainerImageLabel({container}) {
@@ -18,7 +26,7 @@ export default function ContainerImageLabel({container}) {
     return(
     <ImageName color={determineColorForString(container.image.name)}>
                   {container.image.name}:
-                  <ImageVersion color={determineColorForString(container.image.version)}>{container.image.version}</ImageVersion>
+                  <ImageVersion color={determineColorForString(container.image.version) + "version-imagex"}>{container.image.version}</ImageVersion>
                 </ImageName>
     );
 }

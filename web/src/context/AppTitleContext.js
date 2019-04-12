@@ -1,14 +1,8 @@
 import * as React from 'react';
 
-/**
- * Great post on how to use Context + React hooks:
- * https://dev.to/oieduardorabelo/react-hooks-how-to-create-and-update-contextprovider-1f68
- *
- * @Author Eduardo Marcondes Rabelo
- *
- */
 const DEFAULT_APP_TITLE = 'Dock Watch ⚓';
 const DEFAULT_APP_COLOR = '#624694';
+
 let TitleContext = React.createContext();
 
 let initialState = {
