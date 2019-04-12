@@ -10,7 +10,7 @@ from tools import api_forwarder as af
 
 # Added a default threshold to close Docker client, until
 # a more permanent solution is found (not prioritized atm)
-LOG_READ_THRESHOLD = os.environ.get('LOG_READ_THRESHOLD', 300)
+LOG_THRESHOLD = os.environ.get('DW_LOG_THRESHOLD', 300)
 
 
 def closeable_client(func):
@@ -168,7 +168,7 @@ def get_container_logs(image, con_name):
             return {'error': err}, 400
 
         for row in client.containers.get(con_name).logs(stream=True):
-            if (time_now() - started) > LOG_READ_THRESHOLD:
+            if (time_now() - started) > LOG_THRESHOLD:
                 print('Log reading threshold reached')
                 break
             yield row.decode("utf-8")
