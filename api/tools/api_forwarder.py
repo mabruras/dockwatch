@@ -67,7 +67,7 @@ def streamable(func):
         req_is_forwarded = request.headers.get('X-Forwarded-For', None)
         req_host = request.args.get('ip', None)
 
-        if not req_host:
+        if not req_host and not req_is_forwarded:
             err = f'No host was requested, please include "ip" as query param'
             print(err)
             return err, 400
