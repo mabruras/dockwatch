@@ -8,7 +8,7 @@ import time
 from socket import SOL_SOCKET, SO_REUSEADDR, SO_BROADCAST, AF_INET, SOCK_DGRAM
 
 BROADCAST_PORT = os.environ.get('DW_BROADCAST_PORT', 11609)
-BROADCAST_DELAY = os.environ.get('DW_BROADCAST_DELAY_MINUTES', 30)
+BROADCAST_INTERVAL = os.environ.get('DW_BROADCAST_INTERVAL', 30)
 
 
 def broadcast_message(msg, broadcast_addr):
@@ -27,7 +27,7 @@ def broadcast_message(msg, broadcast_addr):
     finally:
         cs.close()
 
-    for i in range(int(BROADCAST_DELAY) * 60):
+    for i in range(int(BROADCAST_INTERVAL) * 60):
         time.sleep(1)
 
 

@@ -180,7 +180,7 @@ export default function DockContainer({ container, imageId, handleRefetch, handl
     }, 
   });
 
-  let containerHref = container.labels['container.url'] || '#';
+  let containerHref = container.labels['dockwatch.container.url'] || '#';
   let isRemovable = container.labels['dockwatch.removable'] && container.labels['dockwatch.removable'].toUpperCase() === "TRUE";
   let isRestartable = container.labels['dockwatch.restartable'] && container.labels['dockwatch.restartable'].toUpperCase() === "TRUE";
 
