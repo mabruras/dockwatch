@@ -11,7 +11,7 @@ import NoResults from "./NoResults";
 import DockContainerState from "./DockContainerState";
 import ContainerLabel from "./ContainerLabels";
 import ContainerImageLabel from "./ContainerImageLabel";
-import DockContainer from "./DockContainer";
+import DockInstanceListItem from "./DockInstanceListItem";
 import ContainerPorts from "./ContainerPorts";
 
 const ContainerLogWrapper = styled.div`
@@ -61,9 +61,15 @@ const StyledInstanceListItem = styled.li`
 
 const SelectedContainerInfo = styled.div``;
 
+const StyledCheckBox = styled.input``;
+const StyledCheckBoxLabel = styled.label`
+    color: #fff;
+`;
+
 export default function ContainerDetails(props) {
   const { dispatch } = useContext(TitleContext);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(true);
   const [selectedContainer, setSelectedContainer] = useState(null);
 
   const {
@@ -166,7 +172,7 @@ export default function ContainerDetails(props) {
                           key={container.id}
                           isSelected={container.id === selectedContainer.id}
                         >
-                          <DockContainer
+                          <DockInstanceListItem
                             container={container}
                             imageId={imageId}
                             handleContainerClick={() =>
@@ -186,16 +192,19 @@ export default function ContainerDetails(props) {
                   📚
                 </span>
               </DetailsTitle>
+
+              <StyledCheckBox id="followLog" type="checkbox" onChange={() => setIsFollowing(!isFollowing)} defaultChecked={isFollowing}/>
+              <StyledCheckBoxLabel htmlFor="followLog">Auto scroll to bottom on new log statements (follow).</StyledCheckBoxLabel>
               <LogWrapper>
                 {selectedContainer && (
                   <ScrollFollow
-                    startFollowing={true}
+                    startFollowing={isFollowing}
                     render={({ follow, onScroll }) => (
                       <LazyLog
                         extraLines={5}
                         url={`/api/images/${imageId}/containers/${selectedContainer.name}/logs?ip=${selectedContainer.ip}`}
                         stream
-                        follow={follow}
+                        follow={isFollowing}
                         onScroll={onScroll}
                         style={{
                           outline: 0,

@@ -6,9 +6,8 @@ import useApi from '../hooks/useApi';
 import Busy from './Busy';
 import NoContentFound from './NoResults';
 import styled from 'styled-components';
-import DockStatusLabels from './DockStatusLabels';
-import { Link } from 'react-router-dom';
 import StyledSearchInput from '../styleguides/StyledSearchInput';
+import DockContainer from './DockContainer';
 
 const Instance = styled.div`
   display: flex;
@@ -20,18 +19,6 @@ const Instance = styled.div`
     flex-direction: column;
   }
 `;
-
-const InstanceTitle = styled.h2`
-  color: #fff;
-  margin: 0;
-`;
-
-const DockLink = styled(({ ...props }) => <Link {...props} />)`
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  cursor: pointer;
-`; 
 
 export default function Containers(props) {
   
@@ -65,35 +52,13 @@ export default function Containers(props) {
 
   return (
     <Busy busy={fetchingContainers}>
-      {(containersResponse && containersResponse.data) && (
+    {(containersResponse && containersResponse.data) && (
         <Container>
           <Instance padded>
             <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search container names..." />   
           </Instance>
         {containersResponse.data.filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase())).map(item => (
-          <React.Fragment key={item.name + item.ip}>
-            <DockLink to={`/${imageId}/${item.name}`}>
-            <Instance color={determineColorForString(item.name)}>
-              <InstanceTitle color={determineColorForString(item.name)}>{item.name}</InstanceTitle>
-              <DockStatusLabels statuses={item.status} />
-            </Instance>
-            </DockLink>
-            
-            { /* 
-            
-            item.instances.map(instance => (
-                <DockInstance 
-                imageId={item.name}
-                container={instance} 
-                key={instance.id} 
-                handleRefetch={() => fetchData()} 
-                />
-              ))
-              
-            */
-              
-            }
-          </React.Fragment>
+          <DockContainer key={item.name + item.ip} container={item} imageId={imageId} handleRefetch={() => fetchData()}/>
         ))}
       </Container>
       )}
