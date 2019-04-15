@@ -196,11 +196,13 @@ def hidden_container(con):
 
 
 def restartable_container(con):
-    return con.labels.get('dockwatch.restartable', 'false').lower() == 'true'
+    labels = con.get('labels',None)
+    return labels.get('dockwatch.restartable', 'false').lower() == 'true' if labels else False
 
 
 def removable_container(con):
-    return con.labels.get('dockwatch.removable', 'false').lower() == 'true'
+    labels = con.get('labels',None)
+    return labels.get('dockwatch.removable', 'false').lower() == 'true' if labels else False
 
 
 def untagged_image_in_con(con):
