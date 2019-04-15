@@ -102,7 +102,7 @@ def restart_container(client, image, con_name):
 
         if restartable_container(con):
             print(f'Restarting container with name {con_name}')
-            con.restart()
+            client.containers.get(con_name).restart()
 
             print('Restart complete')
             return dict(), 200
