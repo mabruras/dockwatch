@@ -106,7 +106,7 @@ custom or special logic, when detecting on a container.
 | dockwatch.hidden | Marks the container as hidden, and unavailable through DockWatch Web | `true` or `false` |
 | dockwatch.restartable | Enable or disable the posibility to **restart** the container | `true` or `false` |
 | dockwatch.removable | Enable or disable the possibility to **remove/delete** the container | `true` or `false` |
-| dockwatch.container.url | URL for accessing the application running in the container | _custom_ |
+| dockwatch.url | URL for accessing the application running in the container | _custom_ |
 
 ### Hidden
 It's not everything that should be exposed to the users, that's why a container could be hidden from DockWatch.
