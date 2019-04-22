@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { TitleContext } from '../context/AppTitleContext';
+import React, {useContext, useEffect, useState} from 'react';
+import {TitleContext} from '../context/AppTitleContext';
 import determineColorForString from '../utils/determineColorForString';
 import Container from '../styleguides/Container';
 import useApi from '../hooks/useApi';
@@ -21,13 +21,13 @@ const Instance = styled.div`
 `;
 
 export default function Containers(props) {
-  
-  const { dispatch } = useContext(TitleContext);
+
+  const {dispatch} = useContext(TitleContext);
   const [filterInput, setFilterInput] = useState("");
 
-  const { 
+  const {
     match: {
-      params: { imageId }
+      params: {imageId}
     }
   } = props;
 
@@ -48,19 +48,21 @@ export default function Containers(props) {
     initialData: []
   });
 
-  if (!imageId || (!fetchingContainers && !containersResponse)) return <NoContentFound />;
+  if (!imageId || (!fetchingContainers && !containersResponse)) return <NoContentFound/>;
 
   return (
     <Busy busy={fetchingContainers}>
-    {(containersResponse && containersResponse.data) && (
+      {(containersResponse && containersResponse.data) && (
         <Container>
           <Instance padded>
-            <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput} placeholder="Search container names..." />   
+            <StyledSearchInput onChange={e => setFilterInput(e.target.value)} value={filterInput}
+                               placeholder="Search container names..."/>
           </Instance>
-        {containersResponse.data.filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase())).map(item => (
-          <DockContainer key={item.name + item.ip} container={item} imageId={imageId} handleRefetch={() => fetchData()}/>
-        ))}
-      </Container>
+          {containersResponse.data.filter(item => filterInput.length === 0 || item.name.toLowerCase().includes(filterInput.toLowerCase())).map(item => (
+            <DockContainer key={item.name + item.ip} container={item} imageId={imageId} onlyActions={false}
+                           handleRefetch={() => fetchData()}/>
+          ))}
+        </Container>
       )}
     </Busy>
   );

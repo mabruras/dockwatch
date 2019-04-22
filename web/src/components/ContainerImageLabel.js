@@ -19,14 +19,15 @@ const ImageVersion = styled.span`
 `;
 
 export default function ContainerImageLabel({container}) {
-    if(!container) {
-        return null;
-    }
-    
-    return(
+  if (!container) {
+    return null;
+  }
+
+  return (
     <ImageName color={determineColorForString(container.image.name)}>
-                  {container.image.name}:
-                  <ImageVersion color={determineColorForString(container.image.version) + "version-imagex"}>{container.image.version}</ImageVersion>
-                </ImageName>
-    );
+      {container.image.name}:
+      <ImageVersion
+        color={determineColorForString(container.image.version) + "version-imagex"}>{container.image.version}</ImageVersion>
+    </ImageName>
+  );
 }

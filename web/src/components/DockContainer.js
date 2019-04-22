@@ -1,20 +1,20 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import styled from "styled-components";
 import DockStatusLabels from "./DockStatusLabels";
-import { loading } from "../icons";
+import {loading} from "../icons";
 import useApi from "../hooks/useApi";
-import { spin } from "../utils/animations";
-import { isWebUri } from "valid-url";
-import { Link } from "react-router-dom";
+import {spin} from "../utils/animations";
+import {isWebUri} from "valid-url";
+import {Link} from "react-router-dom";
 import determineColorForString from "../utils/determineColorForString";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 
 const InstanceTitle = styled.h2`
   color: #fff;
   margin: 0;
 `;
 
-const DockLink = styled(({ ...props }) => <Link {...props} />)`
+const DockLink = styled(({...props}) => <Link {...props} />)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -116,11 +116,11 @@ const Instance = styled.div`
   }
 `;
 
-const Actions = styled("div")`
+const Info = styled("div")`
 display: flex;
 `;
 
-export default function DockContainer({ container, imageId, handleRefetch }) {
+export default function DockContainer({container, imageId, onlyActions, handleRefetch}) {
   const [isRemoving, setIsRemoving] = useState(false);
 
   // eslint-disable-next-line
@@ -130,7 +130,7 @@ export default function DockContainer({ container, imageId, handleRefetch }) {
       method: "POST",
       successDelay: 2000,
       onSuccess: () => {
-        toast.success(`Successfully restarted ${container.name}. 🦄`)
+        toast.success(`Successfully restarted ${container.name}. 🦄`);
         handleRefetch();
       },
       onError: e => {
@@ -150,7 +150,7 @@ export default function DockContainer({ container, imageId, handleRefetch }) {
       toast.success(`Successfully removed ${container.name}. 😊`)
     },
     onError: (error) => {
-        toast.error(`Ouch! Failed to delete ${container.name}. 💔`)
+      toast.error(`Ouch! Failed to delete ${container.name}. 💔`)
     }
   });
 
@@ -179,31 +179,35 @@ export default function DockContainer({ container, imageId, handleRefetch }) {
   return (
     <React.Fragment>
       <Instance color={determineColorForString(container.name)}>
-        <DockLink to={`/${imageId}/${container.name}`}>
-          <InstanceTitle color={determineColorForString(container.name)}>
-          {(removingContainer || restartingContainer) && <Spinner>{loading}</Spinner>} {container.name}
-          </InstanceTitle>
-        </DockLink>
-        <Actions>
-        <DockStatusLabels statuses={container.status} />
-        {!isRemoving && (
-        <ContainerOptions>
-          {isRestartable && (
-            <Restart onClick={() => restartContainer()}>RESTART</Restart>
+        {!onlyActions && (
+          <DockLink to={`/${imageId}/${container.name}`}>
+            <InstanceTitle color={determineColorForString(container.name)}>
+              {(removingContainer || restartingContainer) && <Spinner>{loading}</Spinner>} {container.name}
+            </InstanceTitle>
+          </DockLink>
+        )}
+        <Info>
+          {!onlyActions && (
+            <DockStatusLabels statuses={container.status}/>
           )}
-          {isRemovable && (
-            <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>
+          {!isRemoving && (
+            <ContainerOptions>
+              {isRestartable && (
+                <Restart onClick={() => restartContainer()}>RESTART</Restart>
+              )}
+              {isRemovable && (
+                <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>
+              )}
+              {containerHref !== "#" && (
+                <SiteLink href={containerHref}>VIEW SITE</SiteLink>
+              )}
+            </ContainerOptions>
+
           )}
-          {containerHref !== "#" && (
-            <SiteLink href={containerHref}>VIEW SITE</SiteLink>
-          )}
-        </ContainerOptions>
-       
-      )}
-        </Actions>
+        </Info>
 
       </Instance>
-      
+
       {removingContainer && <StyledMessage>Removing container..</StyledMessage>}
       {isRemoving && (
         <RemoveWarn>
@@ -217,7 +221,7 @@ export default function DockContainer({ container, imageId, handleRefetch }) {
           </ContainerOptions>
         </RemoveWarn>
       )}
-      
+
     </React.Fragment>
   );
 }

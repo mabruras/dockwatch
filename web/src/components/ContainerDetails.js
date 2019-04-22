@@ -1,9 +1,9 @@
-import React, { useContext, useState } from "react";
-import styled, { css } from "styled-components";
+import React, {useContext, useState} from "react";
+import styled, {css} from "styled-components";
 import Container from "../styleguides/Container";
 import Flex from "../styleguides/Flex";
-import { LazyLog, ScrollFollow } from "react-lazylog/es5";
-import { TitleContext } from "../context/AppTitleContext";
+import {LazyLog, ScrollFollow} from "react-lazylog/es5";
+import {TitleContext} from "../context/AppTitleContext";
 import Busy from "./Busy";
 import useApi from "../hooks/useApi";
 import determineColorForString from "../utils/determineColorForString";
@@ -13,6 +13,7 @@ import ContainerLabel from "./ContainerLabels";
 import ContainerImageLabel from "./ContainerImageLabel";
 import DockInstanceListItem from "./DockInstanceListItem";
 import ContainerPorts from "./ContainerPorts";
+import DockContainer from "./DockContainer";
 
 const ContainerLogWrapper = styled.div`
   margin: 1rem;
@@ -53,8 +54,8 @@ const StyledInstanceListItem = styled.li`
   background-color: #111;
 
   ${props =>
-    props.isSelected &&
-    css`
+  props.isSelected &&
+  css`
       background-color: #232323;
     `}
 `;
@@ -67,14 +68,14 @@ const StyledCheckBoxLabel = styled.label`
 `;
 
 export default function ContainerDetails(props) {
-  const { dispatch } = useContext(TitleContext);
+  const {dispatch} = useContext(TitleContext);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isFollowing, setIsFollowing] = useState(true);
   const [selectedContainer, setSelectedContainer] = useState(null);
 
   const {
     match: {
-      params: { imageId, containerName }
+      params: {imageId, containerName}
     }
   } = props;
 
@@ -111,10 +112,10 @@ export default function ContainerDetails(props) {
     !fetchingContainer &&
     hasLoaded
   ) {
-    return <NoResults />;
+    return <NoResults/>;
   }
   if (!selectedContainer) {
-    return <div />;
+    return <div/>;
   }
 
   return (
@@ -148,43 +149,53 @@ export default function ContainerDetails(props) {
                     </DetailsTitle>
                   )}
                   <DetailsSubTitle>Original image</DetailsSubTitle>
-                  <ContainerImageLabel container={selectedContainer} />
+                  <ContainerImageLabel container={selectedContainer}/>
                   <DetailsSubTitle>Container state</DetailsSubTitle>
-                  <DockContainerState container={selectedContainer} />
+                  <DockContainerState container={selectedContainer}/>
                   <DetailsSubTitle>
                     Labels{" "}
                     {selectedContainer && selectedContainer.labels
                       ? `(${Object.keys(selectedContainer.labels).length})`
                       : ""}
                   </DetailsSubTitle>
-                  <ContainerLabel container={selectedContainer} />
+                  <ContainerLabel container={selectedContainer}/>
                   <DetailsSubTitle>
                     Port mapping
                   </DetailsSubTitle>
-                  <ContainerPorts ports={selectedContainer.ports} />
+                  <ContainerPorts ports={selectedContainer.ports}/>
                 </SelectedContainerInfo>
-                {containerResponse.data[0].instances.length > 1 && (
-                  <div>
-                    <DetailsSubTitle>Select instance</DetailsSubTitle>
-                    <StyledInstanceList>
-                      {containerResponse.data[0].instances.map(container => (
-                        <StyledInstanceListItem
-                          key={container.id}
-                          isSelected={container.id === selectedContainer.id}
-                        >
-                          <DockInstanceListItem
-                            container={container}
-                            imageId={imageId}
-                            handleContainerClick={() =>
-                              setSelectedContainer(container)
-                            }
-                            handleRefetch={() => refetch()}
-                          />
-                        </StyledInstanceListItem>
-                      ))}
-                    </StyledInstanceList>
-                  </div>
-                )}
+                <div>
+                  {containerResponse.data.length > 0 && (
+                    <DockContainer
+                      container={containerResponse.data[0]}
+                      imageId={imageId}
+                      onlyActions={true}
+                      handleRefetch={() => refetch()}
+                    />
+                  )}
+                  {containerResponse.data[0].instances.length > 1 && (
+                    <div>
+                      <DetailsSubTitle>Select instance</DetailsSubTitle>
+                      <StyledInstanceList>
+                        {containerResponse.data[0].instances.map(container => (
+                          <StyledInstanceListItem
+                            key={container.id}
+                            isSelected={container.id === selectedContainer.id}
+                          >
+                            <DockInstanceListItem
+                              container={container}
+                              imageId={imageId}
+                              handleContainerClick={() =>
+                                setSelectedContainer(container)
+                              }
+                              handleRefetch={() => refetch()}
+                            />
+                          </StyledInstanceListItem>
+                        ))}
+                      </StyledInstanceList>
+                    </div>
+                  )}
+                </div>
               </Flex>
               <DetailsTitle>
                 Dock Log{" "}
@@ -193,13 +204,15 @@ export default function ContainerDetails(props) {
                 </span>
               </DetailsTitle>
 
-              <StyledCheckBox id="followLog" type="checkbox" onChange={() => setIsFollowing(!isFollowing)} defaultChecked={isFollowing}/>
-              <StyledCheckBoxLabel htmlFor="followLog">Auto scroll to bottom on new log statements (follow).</StyledCheckBoxLabel>
+              <StyledCheckBox id="followLog" type="checkbox" onChange={() => setIsFollowing(!isFollowing)}
+                              defaultChecked={isFollowing}/>
+              <StyledCheckBoxLabel htmlFor="followLog">Auto scroll to bottom on new log statements
+                (follow).</StyledCheckBoxLabel>
               <LogWrapper>
                 {selectedContainer && (
                   <ScrollFollow
                     startFollowing={isFollowing}
-                    render={({ follow, onScroll }) => (
+                    render={({follow, onScroll}) => (
                       <LazyLog
                         extraLines={5}
                         url={`/api/images/${imageId}/containers/${selectedContainer.name}/logs?ip=${selectedContainer.ip}`}

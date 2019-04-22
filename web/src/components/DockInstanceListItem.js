@@ -56,30 +56,30 @@ const ContainerTag = styled.span`
 `;
 
 
-export default function DockInstanceListItem({ container, handleContainerClick }) {
-  
+export default function DockInstanceListItem({container, handleContainerClick}) {
+
   if (!container) {
     return null;
   }
 
-  
+
   return (
     <DockContainerWrapper>
-    <StyledObjectLink onClick={() => handleContainerClick()}>
-    <ContainerNameWrapper>
-    <ContainerTag color={determineColorForString(container.name)}>
-         {"#"}
-    </ContainerTag>
-      <ContainerName>
-        {container.name}@<ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
-      </ContainerName>
-    </ContainerNameWrapper>
-      <ContainerState>
-        <DockContainerState container={container} />
-      </ContainerState>
-      <ContainerImageLabel container={container} />
-      <ContainerPortsSlim ports={container.ports} hideOnEmptyPorts={true} />
-    </StyledObjectLink>
+      <StyledObjectLink onClick={() => handleContainerClick()}>
+        <ContainerNameWrapper>
+          <ContainerTag color={determineColorForString(container.name)}>
+            {"#"}
+          </ContainerTag>
+          <ContainerName>
+            {container.name}@<ColorizedSpan color={determineColorForString(container.ip)}>{container.ip}</ColorizedSpan>
+          </ContainerName>
+        </ContainerNameWrapper>
+        <ContainerState>
+          <DockContainerState container={container}/>
+        </ContainerState>
+        <ContainerImageLabel container={container}/>
+        <ContainerPortsSlim ports={container.ports} hideOnEmptyPorts={true}/>
+      </StyledObjectLink>
     </DockContainerWrapper>
   );
 }
