@@ -7,17 +7,18 @@ import * as serviceWorker from './serviceWorker';
 import 'react-tippy/dist/tippy.css';
 import history from './utils/history';
 import { TitleContextProvider } from './context/AppTitleContext';
-import SelectedNodeProvider from './context/SelectedNodeContext';
 import './styles/lazylog/index.css';
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 ReactDOM.render(
+  (
   <Router history={history}>
-    <SelectedNodeProvider>
-      <TitleContextProvider>
+    
+    <TitleContextProvider>
           <App />
+          <ToastContainer />
       </TitleContextProvider>
-    </SelectedNodeProvider>
-      </Router>,
+      </Router>),
   document.getElementById('root')
 );
 

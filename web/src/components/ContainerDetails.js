@@ -1,17 +1,19 @@
-import React, { useContext, useState } from 'react';
-import styled from 'styled-components';
-import Container from '../styleguides/Container';
-import Flex from '../styleguides/Flex';
-import { LazyLog, ScrollFollow } from 'react-lazylog/es5';
-import { SelectedNodeContext } from '../context/SelectedNodeContext';
-import { TitleContext } from '../context/AppTitleContext';
-import Busy from './Busy';
-import useApi from '../hooks/useApi';
-import determineColorForString from '../utils/determineColorForString';
-import NoResults from './NoResults';
-import DockContainerState from './DockContainerState';
-import ContainerLabel from './ContainerLabels';
-import ContainerImageLabel from './ContainerImageLabel';
+import React, {useContext, useState} from "react";
+import styled, {css} from "styled-components";
+import Container from "../styleguides/Container";
+import Flex from "../styleguides/Flex";
+import {LazyLog, ScrollFollow} from "react-lazylog/es5";
+import {TitleContext} from "../context/AppTitleContext";
+import Busy from "./Busy";
+import useApi from "../hooks/useApi";
+import determineColorForString from "../utils/determineColorForString";
+import NoResults from "./NoResults";
+import DockContainerState from "./DockContainerState";
+import ContainerLabel from "./ContainerLabels";
+import ContainerImageLabel from "./ContainerImageLabel";
+import DockInstanceListItem from "./DockInstanceListItem";
+import ContainerPorts from "./ContainerPorts";
+import DockContainer from "./DockContainer";
 
 const ContainerLogWrapper = styled.div`
   margin: 1rem;
@@ -23,124 +25,215 @@ const LogWrapper = styled.div`
   margin: 0.5rem 0;
 `;
 
-const DetailsTitle = styled.h2`
+const DetailsTitle = styled.h1`
+  font-size: 2.7rem;
   color: #fff;
   margin: 0.5rem 0;
 `;
 
-const ContainerName = styled.p`
+const ContainerName = styled.span`
   margin: 0;
   color: ${props => props.color || "orange"};
 `;
 
-const ContainerId = styled.span`
-  color: #777;
-  font-style: italic;
+const DetailsSubTitle = styled.h2`
+  color: #dbdbdb;
+  margin: 0.5rem 0;
+  margin-top: 1rem;
 `;
 
-const DetailsSubTitle = styled.h3`
-    color: #dbdbdb;
-    margin: 0.5rem 0;
-    margin-top: 1rem;
+const StyledInstanceList = styled.ul`
+  margin: 0;
+  list-style: none;
+  max-height: 600px;
+  overflow: auto;
 `;
 
-export default function ContainerDetails (props) {
-  
-  const { dispatch } = useContext(TitleContext);
+const StyledInstanceListItem = styled.li`
+  transition: all 0.1s ease-in-out;
+  background-color: #111;
+
+  ${props =>
+  props.isSelected &&
+  css`
+      background-color: #232323;
+    `}
+`;
+
+const SelectedContainerInfo = styled.div``;
+
+const StyledCheckBox = styled.input``;
+const StyledCheckBoxLabel = styled.label`
+    color: #fff;
+`;
+
+export default function ContainerDetails(props) {
+  const {dispatch} = useContext(TitleContext);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(true);
+  const [selectedContainer, setSelectedContainer] = useState(null);
 
   const {
     match: {
-      params: { containerId }
+      params: {imageId, containerName}
     }
   } = props;
 
-  const [fetchingContainer, container] = useApi({
-    endpoint: `containers/${containerId}`,
+  //eslint-disable-next-line
+  const [fetchingContainer, containerResponse, err, refetch] = useApi({
+    endpoint: `images/${imageId}/containers/${containerName}`,
     initialData: null,
     fetchOnMount: true,
     onSuccess: container => {
-      setHasLoaded(true)
+      setHasLoaded(true);
+
+      if (container && container.data && container.data.length) {
+        if (container.data[0].instances && container.data[0].instances.length) {
+          setSelectedContainer(container.data[0].instances[0]);
+        }
+      }
+
       dispatch({
-        type: 'set-title',
+        type: "set-title",
         data: {
-          title: container.name,
-          titleColor: determineColorForString(container.name)
+          title: containerName,
+          titleColor: determineColorForString(containerName)
         }
       });
     },
     onError: e => {
-      setHasLoaded(true)
+      setHasLoaded(true);
     }
   });
 
-  const selectedNodeContext = useContext(SelectedNodeContext);
-
-
-  if(!container && !fetchingContainer && hasLoaded) {
-    return <NoResults />
+  if (
+    (!containerResponse ||
+      (!containerResponse.data || !containerResponse.data.length)) &&
+    !fetchingContainer &&
+    hasLoaded
+  ) {
+    return <NoResults/>;
+  }
+  if (!selectedContainer) {
+    return <div/>;
   }
 
   return (
     <Busy busy={fetchingContainer}>
-      {fetchingContainer ? <DetailsTitle>Loading..</DetailsTitle> : (
+      {!hasLoaded ? (
+        <DetailsTitle>Loading..</DetailsTitle>
+      ) : (
+        <ContainerLogWrapper key={selectedContainer.name}>
+          <Flex
+            justify="center"
+            alignItems="center"
+            direction="column"
+            basis="auto"
+          >
+            <Container>
+              <Flex justify="space-between">
+                <SelectedContainerInfo>
+                  {selectedContainer && (
+                    <DetailsTitle>
+                      <ContainerName
+                        color={determineColorForString(selectedContainer.name)}
+                      >
+                        {selectedContainer.name}@
+                      </ContainerName>
 
-      <ContainerLogWrapper>
-        <Flex
-          justify="center"
-          alignItems="center"
-          direction="column"
-          basis="auto"
-        >
-          <Container>
+                      <ContainerName
+                        color={determineColorForString(selectedContainer.ip)}
+                      >
+                        {selectedContainer.ip}
+                      </ContainerName>
+                    </DetailsTitle>
+                  )}
+                  <DetailsSubTitle>Original image</DetailsSubTitle>
+                  <ContainerImageLabel container={selectedContainer}/>
+                  <DetailsSubTitle>Container state</DetailsSubTitle>
+                  <DockContainerState container={selectedContainer}/>
+                  <DetailsSubTitle>
+                    Labels{" "}
+                    {selectedContainer && selectedContainer.labels
+                      ? `(${Object.keys(selectedContainer.labels).length})`
+                      : ""}
+                  </DetailsSubTitle>
+                  <ContainerLabel container={selectedContainer}/>
+                  <DetailsSubTitle>
+                    Port mapping
+                  </DetailsSubTitle>
+                  <ContainerPorts ports={selectedContainer.ports}/>
+                </SelectedContainerInfo>
+                <div>
+                  {containerResponse.data.length > 0 && (
+                    <DockContainer
+                      container={containerResponse.data[0]}
+                      imageId={imageId}
+                      onlyActions={true}
+                      handleRefetch={() => refetch()}
+                    />
+                  )}
+                  {containerResponse.data[0].instances.length > 1 && (
+                    <div>
+                      <DetailsSubTitle>Select instance</DetailsSubTitle>
+                      <StyledInstanceList>
+                        {containerResponse.data[0].instances.map(container => (
+                          <StyledInstanceListItem
+                            key={container.id}
+                            isSelected={container.id === selectedContainer.id}
+                          >
+                            <DockInstanceListItem
+                              container={container}
+                              imageId={imageId}
+                              handleContainerClick={() =>
+                                setSelectedContainer(container)
+                              }
+                              handleRefetch={() => refetch()}
+                            />
+                          </StyledInstanceListItem>
+                        ))}
+                      </StyledInstanceList>
+                    </div>
+                  )}
+                </div>
+              </Flex>
               <DetailsTitle>
-                  Container details 
+                Dock Log{" "}
+                <span role="img" aria-label="log">
+                  📚
+                </span>
               </DetailsTitle>
-               {container && (
-                 <>
-               <DetailsSubTitle>
-                 Container name
-               </DetailsSubTitle>
-                 <ContainerName color={determineColorForString(container.name)}>{container.name} <ContainerId>(id: {container.id})</ContainerId></ContainerName>
-                 </>
-               )} 
-              <DetailsSubTitle>
-                 Original image
-              </DetailsSubTitle>
-                <ContainerImageLabel container={container} />
-              <DetailsSubTitle>
-                  Container state
-              </DetailsSubTitle>
-              <DockContainerState container={container} />
-              <DetailsSubTitle>
-                  Labels {container ? `(${Object.keys(container.labels).length})` : ''}
-              </DetailsSubTitle>
-              <ContainerLabel container={container} />
-              <DetailsTitle>
-                  Dock Log <span role="img" aria-label="log">📚</span>
-              </DetailsTitle>
-            <LogWrapper>
-            {container && (
 
-              <ScrollFollow
-                startFollowing={true}
-                render={({ follow, onScroll }) => (
-                <LazyLog extraLines={5} url={`${selectedNodeContext.data.baseUrl}/containers/${container.id}/logs`} stream follow={follow} onScroll={onScroll} style={
-                {
-                  outline: 0,
-                  color: "#fff",
-                  background: "#111"
-                } 
-              }/>
-              )}
-              />
-            )}
-            </LogWrapper>
-          </Container>
-        </Flex>
-      </ContainerLogWrapper>
+              <StyledCheckBox id="followLog" type="checkbox" onChange={() => setIsFollowing(!isFollowing)}
+                              defaultChecked={isFollowing}/>
+              <StyledCheckBoxLabel htmlFor="followLog">Auto scroll to bottom on new log statements
+                (follow).</StyledCheckBoxLabel>
+              <LogWrapper>
+                {selectedContainer && (
+                  <ScrollFollow
+                    startFollowing={isFollowing}
+                    render={({follow, onScroll}) => (
+                      <LazyLog
+                        extraLines={5}
+                        url={`/api/images/${imageId}/containers/${selectedContainer.name}/logs?ip=${selectedContainer.ip}`}
+                        stream
+                        follow={isFollowing}
+                        onScroll={onScroll}
+                        style={{
+                          outline: 0,
+                          color: "#fff",
+                          background: "#111"
+                        }}
+                      />
+                    )}
+                  />
+                )}
+              </LogWrapper>
+            </Container>
+          </Flex>
+        </ContainerLogWrapper>
       )}
-      
-      </Busy>
+      )) )}
+    </Busy>
   );
 }

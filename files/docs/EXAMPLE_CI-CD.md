@@ -85,7 +85,7 @@ Example:
 IMG_REF="${REGISTRY}/${APPLICATION}:${VERSION}"
 
 docker run -d \
-  --label "container.url=${APPLICATION}-${VERSION}.dev.example.com" \
+  --label "dockwatch.url=${APPLICATION}-${VERSION}.dev.example.com" \
   --name "${APPLICATION}-${VERSION}" \
   ${IMG_REF}
 ``` 
@@ -100,11 +100,11 @@ and will let you modify the frontend based upon the labels.
 
 Example labels:
 * `environment=dev` # _Should be changed to actual environment_
-* `container.url=app1.dev.example.com` # _Dependent on Traefik setup,
+* `dockwatch.url=app1.dev.example.com` # _Dependent on Traefik setup,
 container name (`app1` in this case) could represent the sub domain_
 
 Because of the Traefik configuration will use `Host`-header for routing,
-we'll use the Traefik host prefixed with the container name as a `container.url`-label.
+we'll use the Traefik host prefixed with the container name as a `dockwatch.url`-label.
 This will make DockWatch create an URL on the specific container,
 and easily let users access the running application through the UI.
 

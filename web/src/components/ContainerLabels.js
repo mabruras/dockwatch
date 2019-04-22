@@ -18,8 +18,11 @@ export default function ContainerLabel({ container }) {
   if (!container) {
       return null;
   }
+
   const labels = Object.keys(container.labels);
- 
+  if(!labels) {
+    return  <NoLabelsFoundText>No labels found.</NoLabelsFoundText>;
+  }
   return (
     <div>
         {labels.map(label => (

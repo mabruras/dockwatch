@@ -2,40 +2,42 @@ version: '3'
 
 services:
 
+  # Installs necessary dependencies in node_modules directory
+  # Useful if Node isn't installed on host development machine
+  web-install:
+    image: node:lts
+    command: "npm install"
+    container_name: dockwatch-web-install
+
+    user: 1000:1000
+    volumes:
+    - ../web:/usr/src/app
+    working_dir: /usr/src/app
+
+
   web:
-    image: mabruras/dockwatch-web
-    build:
-      context: ../web
+    image: node:lts
     restart: unless-stopped
     container_name: dockwatch-web
-    labels:
-    - "dockwatch.hidden=true"
+    command: "npm start"
 
     environment:
-    - "REACT_APP_API_URL=${DOCKWATCH_API:-http://localhost:1609/api}"
+    - "REACT_APP_API_URL=http://localhost:1609/api"
+    volumes:
+    - ../web:/usr/src/app
+    working_dir: /usr/src/app
     ports:
     - 3000:3000
 
   api:
-    image: mabruras/dockwatch-api
-    build:
-      context: ../api
+    image: python:3.7
     restart: unless-stopped
     container_name: dockwatch-api
-    labels:
-    - "dockwatch.hidden=true"
+    command: "python app.py"
 
     volumes:
+    - ../api:/usr/src/app
     - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /usr/src/app
     ports:
     - 1609:1609
-
-  redis:
-    image: redis
-    restart: unless-stopped
-    container_name: dw_redis
-    labels:
-    - "dockwatch.hidden=true"
-
-    ports:
-    - 6379:6379

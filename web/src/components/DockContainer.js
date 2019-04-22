@@ -1,63 +1,35 @@
-import React, { useState } from 'react';
-import styled, { css } from 'styled-components';
-import determineColorForString from '../utils/determineColorForString';
-import DockContainerState from './DockContainerState';
-import useApi from '../hooks/useApi';
-import { loading } from '../icons';
-import { spin } from '../utils/animations';
-import { isWebUri } from 'valid-url';
-import { Link } from 'react-router-dom';
-import ContainerImageLabel from './ContainerImageLabel';
+import React, {useState} from "react";
+import styled from "styled-components";
+import DockStatusLabels from "./DockStatusLabels";
+import {loading} from "../icons";
+import useApi from "../hooks/useApi";
+import {spin} from "../utils/animations";
+import {isWebUri} from "valid-url";
+import {Link} from "react-router-dom";
+import determineColorForString from "../utils/determineColorForString";
+import {toast} from "react-toastify";
 
-const DockContainerWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid #624694;
-  @media all and (max-width: 450px) {
-    flex-direction: column;
-  }
-
-  ${props => props.isRemoving && css`
-  border-bottom: 0;
-  background-color: #222;
-  `}
-
+const InstanceTitle = styled.h2`
+  color: #fff;
+  margin: 0;
 `;
 
-const StyledObjectLink = styled(({ ...props }) => <Link {...props} />)`
+const DockLink = styled(({...props}) => <Link {...props} />)`
   display: flex;
   flex-direction: column;
   text-decoration: none;
   cursor: pointer;
 `;
 
-const ContainerNameWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  margin: 0.5rem 0;
-
-`;
-
-const ContainerName = styled.h2`
-  color: #946ddc;
-  margin: 0;
-  padding: 0;
-
-  @media all and (max-width: 450px) {
-    font-size: 1.4rem;
+const Spinner = styled.span`
+  svg {
+    animation: ${spin} 4s infinite linear;
   }
-  `;
-
-const ContainerState = styled.div`
-  display: flex;
-  align-items: center;
 `;
 
-const ContainerTag = styled.span`
-  margin-right: 10px;
-  font-size: 1.8rem;
-  color: ${props => props.color};
+const StyledMessage = styled.p`
+  margin: 0.5rem 0;
+  color: #fff;
 `;
 
 const ContainerOptions = styled.div`
@@ -65,7 +37,27 @@ const ContainerOptions = styled.div`
   @media all and (max-width: 450px) {
     justify-content: space-around;
   }
-  `;
+`;
+
+const RemoveWarn = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  background: #222;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const StyledWarnHeader = styled.h3`
+  color: salmon;
+  margin: 0;
+`;
+
+const StyledWarnText = styled.p`
+  color: salmon;
+  margin: 1rem;
+`;
 
 const COMMON_ACTION_BUTTON_STYLES = `
   text-decoration: none;
@@ -89,11 +81,11 @@ const COMMON_ACTION_BUTTON_STYLES = `
   @media all and (max-width: 450px) {
     margin: 0.5rem;
   }
-`
+`;
 
 const StyledActionButton = styled.button`
   ${COMMON_ACTION_BUTTON_STYLES}
-  `;
+`;
 
 const SiteLink = styled.a`
   color: lightskyblue;
@@ -104,131 +96,132 @@ const Cancel = styled(StyledActionButton)`
   color: #dbdbdb;
 `;
 
-
 const Remove = styled(StyledActionButton)`
   color: salmon;
 `;
-
 
 const Restart = styled(StyledActionButton)`
   color: orange;
 }
 `;
 
-const StyledMessage = styled.p`
-  margin: 0.5rem 0;
-  color: #fff;
-`;
-
-const Spinner = styled.span`
-  svg {
-    animation: ${spin} 4s infinite linear;
-  }
-`;
-
-const RemoveWarn = styled.div`
-  width: 100%;
+const Instance = styled.div`
   display: flex;
+  justify-content: space-between;
   padding: 1rem;
-  background: #222;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  `;
+  border-bottom: 3px solid ${props => props.color || "transparent"};
 
-const StyledWarnHeader = styled.h3`
-  color: salmon;
-  margin: 0;
-`;
-
-const StyledWarnText = styled.p`
-  color: salmon;
-  margin: 1rem;
-`;
-
-export default function DockContainer({ imageId, container, handleRefetch }) {
-  
-  if (!container) {
-    return null;
+  @media all and (max-width: 650px) {
+    display: block;
   }
+`;
 
+const Info = styled("div")`
+display: flex;
+`;
+
+export default function DockContainer({container, imageId, onlyActions, handleRefetch}) {
   const [isRemoving, setIsRemoving] = useState(false);
 
   // eslint-disable-next-line
-  const [restartingContainer, restartResponse, err1, restartContainer] = useApi({
-    endpoint: `containers/${container.id}/restart`,
-    method: "POST",
-    successDelay: 2000,
-    onSuccess: () => {
-     handleRefetch()
-    }, 
-  });
+  const [restartingContainer, restartResponse, err1, restartContainer] = useApi(
+    {
+      endpoint: `images/${imageId}/containers/${container.name}/restart`,
+      method: "POST",
+      successDelay: 2000,
+      onSuccess: () => {
+        toast.success(`Successfully restarted ${container.name}. 🦄`);
+        handleRefetch();
+      },
+      onError: e => {
+        toast.error(`Ouch! Failed to restart ${container.name}. 🤔`)
+      }
+    }
+  );
 
-   // eslint-disable-next-line
+  // eslint-disable-next-line
   const [removingContainer, removeResponse, err2, removeContainer] = useApi({
-    endpoint: `containers/${container.id}/delete`,
+    endpoint: `images/${imageId}/containers/${container.name}/delete`,
     method: "DELETE",
     successDelay: 2000,
     onSuccess: () => {
-     handleRefetch()
-    }, 
+      setIsRemoving(false);
+      handleRefetch();
+      toast.success(`Successfully removed ${container.name}. 😊`)
+    },
+    onError: (error) => {
+      toast.error(`Ouch! Failed to delete ${container.name}. 💔`)
+    }
   });
 
-  let containerHref = container.labels['container.url'] || '#';
-  let isRemovable = container.labels['dockwatch.removable'] && container.labels['dockwatch.removable'].toUpperCase() === "TRUE";
-  let isRestartable = container.labels['dockwatch.restartable'] && container.labels['dockwatch.restartable'].toUpperCase() === "TRUE";
+  let containerHref =
+    container.instances.find(
+      instance => instance.labels && instance.labels["dockwatch.url"]
+    ) || "#";
 
-  if(containerHref !== '#' && !isWebUri(containerHref)) {
+  let isRemovable = container.instances.some(
+    instance =>
+      instance.labels &&
+      instance.labels["dockwatch.removable"] &&
+      instance.labels["dockwatch.removable"].toUpperCase() === "TRUE"
+  );
+  let isRestartable = container.instances.some(
+    instance =>
+      instance.labels &&
+      instance.labels["dockwatch.restartable"] &&
+      instance.labels["dockwatch.restartable"].toUpperCase() === "TRUE"
+  );
+
+  if (containerHref !== "#" && !isWebUri(containerHref)) {
     containerHref = "http://" + containerHref;
   }
 
   return (
-    <div>
-      
-   
+    <React.Fragment>
+      <Instance color={determineColorForString(container.name)}>
+        {!onlyActions && (
+          <DockLink to={`/${imageId}/${container.name}`}>
+            <InstanceTitle color={determineColorForString(container.name)}>
+              {(removingContainer || restartingContainer) && <Spinner>{loading}</Spinner>} {container.name}
+            </InstanceTitle>
+          </DockLink>
+        )}
+        <Info>
+          {!onlyActions && (
+            <DockStatusLabels statuses={container.status}/>
+          )}
+          {!isRemoving && (
+            <ContainerOptions>
+              {isRestartable && (
+                <Restart onClick={() => restartContainer()}>RESTART</Restart>
+              )}
+              {isRemovable && (
+                <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>
+              )}
+              {containerHref !== "#" && (
+                <SiteLink href={containerHref}>VIEW SITE</SiteLink>
+              )}
+            </ContainerOptions>
 
-    <DockContainerWrapper isRemoving={isRemoving}>
-    <StyledObjectLink to={`/${imageId}/${container.id}`}>
-    <ContainerNameWrapper>
-    <ContainerTag color={determineColorForString(container.name)}>
-          { restartingContainer ? <Spinner>{loading}</Spinner> : "#" }
-    </ContainerTag>
-      <ContainerName>
-        {container.name}
-      </ContainerName>
+          )}
+        </Info>
 
-    </ContainerNameWrapper>
+      </Instance>
 
-      <ContainerState>
-      <DockContainerState container={container} />
-      </ContainerState>
-      <ContainerImageLabel container={container} />
-      {
-        removingContainer && <StyledMessage>Removing container..</StyledMessage>
-      }
-    </StyledObjectLink>
-    {
-      !isRemoving && (
-        <ContainerOptions>
-        {isRestartable && <Restart onClick={() => restartContainer()}>RESTART</Restart>}
-        {isRemovable && <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>}
-        {containerHref !== '#' && <SiteLink href={containerHref}>VIEW SITE</SiteLink>}
-      </ContainerOptions>
-      )
-    }
-    </DockContainerWrapper>
-    {
-      isRemoving && (
+      {removingContainer && <StyledMessage>Removing container..</StyledMessage>}
+      {isRemoving && (
         <RemoveWarn>
           <StyledWarnHeader>Confirm remove</StyledWarnHeader>
-          <StyledWarnText>Warning: This action cannot be undone.</StyledWarnText>
+          <StyledWarnText>
+            Warning: This action cannot be undone.
+          </StyledWarnText>
           <ContainerOptions>
-           <Cancel onClick={() => setIsRemoving(false)}>CANCEL</Cancel>
-           <Remove onClick={() => removeContainer()}>REMOVE</Remove>
+            <Cancel onClick={() => setIsRemoving(false)}>CANCEL</Cancel>
+            <Remove onClick={() => removeContainer()}>REMOVE</Remove>
           </ContainerOptions>
         </RemoveWarn>
-      )
-    }
-    </div>
+      )}
+
+    </React.Fragment>
   );
 }
