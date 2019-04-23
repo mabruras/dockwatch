@@ -159,13 +159,13 @@ export default function DockContainer({container, imageId, onlyActions, handleRe
       instance => instance.labels && instance.labels["dockwatch.url"]
     ) || "#";
 
-  let isRemovable = container.instances.some(
+  let isRemovable = container.instances.filter(
     instance =>
       instance.labels &&
       instance.labels["dockwatch.removable"] &&
       instance.labels["dockwatch.removable"].toUpperCase() === "TRUE"
   );
-  let isRestartable = container.instances.some(
+  let isRestartable = container.instances.filter(
     instance =>
       instance.labels &&
       instance.labels["dockwatch.restartable"] &&
@@ -192,10 +192,15 @@ export default function DockContainer({container, imageId, onlyActions, handleRe
           )}
           {!isRemoving && (
             <ContainerOptions>
-              {isRestartable && (
-                <Restart onClick={() => restartContainer()}>RESTART</Restart>
+              {(isRestartable.length > 0) && (
+                <Restart onClick={() => {
+                  if (isRestartable.length === container.instances.length
+                    || window.confirm(`This will only restart ${isRestartable.length}/${container.instances.length} instances.`)) {
+                    restartContainer()
+                  }
+                }}>RESTART</Restart>
               )}
-              {isRemovable && (
+              {(isRemovable.length > 0) && (
                 <Remove onClick={() => setIsRemoving(true)}>REMOVE</Remove>
               )}
               {containerHref !== "#" && (
@@ -205,7 +210,6 @@ export default function DockContainer({container, imageId, onlyActions, handleRe
 
           )}
         </Info>
-
       </Instance>
 
       {removingContainer && <StyledMessage>Removing container..</StyledMessage>}
@@ -214,6 +218,7 @@ export default function DockContainer({container, imageId, onlyActions, handleRe
           <StyledWarnHeader>Confirm remove</StyledWarnHeader>
           <StyledWarnText>
             Warning: This action cannot be undone.
+            This will remove {`${isRemovable.length}/${container.instances.length}`} instances.
           </StyledWarnText>
           <ContainerOptions>
             <Cancel onClick={() => setIsRemoving(false)}>CANCEL</Cancel>
